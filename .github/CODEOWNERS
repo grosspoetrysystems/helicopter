@@ -1,0 +1,14 @@
+# Replace both placeholders before requiring CODEOWNER review.
+* @ORG/MAINTAINERS
+
+/.github/workflows/ @ORG/SECURITY
+/.github/CODEOWNERS @ORG/SECURITY
+/scripts/validate_pr.py @ORG/SECURITY
+/tests/test_validate_pr.py @ORG/SECURITY
+/SECURITY.md @ORG/SECURITY
+/CONTRIBUTING.md @ORG/MAINTAINERS @ORG/SECURITY
+/MAINTAINERS.md @ORG/MAINTAINERS @ORG/SECURITY
+/CODE_OF_CONDUCT.md @ORG/MAINTAINERS
+
+# Add project-specific owners for dependency manifests, lockfiles,
+# authentication/security code, release code, generators, and agent instructions.

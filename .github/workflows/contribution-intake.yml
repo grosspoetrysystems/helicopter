@@ -1,0 +1,35 @@
+name: contribution-intake
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contribution-intake-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Check out validator from protected base commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted-base
+          persist-credentials: false
+          sparse-checkout: scripts
+          fetch-depth: 1
+
+      - name: Validate pull request metadata
+        env:
+          EVENT_PATH: ${{ github.event_path }}
+        run: python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH"
+
+      # Security invariant: this privileged event must never check out or execute
+      # the pull request head. Project builds/tests belong in a separate
+      # pull_request workflow with no secrets and read-only permissions.
