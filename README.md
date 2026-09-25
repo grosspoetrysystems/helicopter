@@ -76,12 +76,31 @@ gh auth login --web
 gh auth status
 ```
 
-Choose the guide that matches the repository:
+Copy the prompt for the path you need.
 
-- [Start a new repository](docs/start-new-repository.md)
-- [Add Helicopter to an existing repository](docs/add-to-existing-repository.md)
+### New repository
 
-Each guide has a copyable agent prompt and a final GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
+```text
+Follow https://github.com/thekidnamedkd/helicopter/blob/main/docs/start-new-repository.md
+to configure this project:
+
+- Name: <PROJECT_NAME>
+- Purpose: <ONE_SENTENCE_PURPOSE>
+- Language/runtime: <STACK>
+- GitHub owner: <OWNER>
+- Maintainer or team: <CODEOWNER>
+- Private security contact: <CONTACT_OR_GITHUB_PRIVATE_REPORTING>
+- Contribution agreement: <DCO_OR_CLA>
+```
+
+### Existing repository
+
+```text
+Follow https://github.com/thekidnamedkd/helicopter/blob/main/docs/add-to-existing-repository.md
+to install Helicopter in the current repository.
+```
+
+The linked guides contain the implementation rules, verification steps, and GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
 
 ## Trust boundary
 
