@@ -1,3 +1,5 @@
+<img src="assets/helicopter-header.webp" alt="A helicopter carrying a bighorn sheep through a spotlight" width="100%">
+
 # Helicopter
 
 Governance and intake for open source projects working with human, AI-assisted, and agent-authored contributions.
