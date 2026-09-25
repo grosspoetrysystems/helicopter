@@ -4,6 +4,9 @@
 
 Governance and intake for open source projects working with human, AI-assisted, and agent-authored contributions.
 
+[![Contribution policy tests](https://github.com/thekidnamedkd/helicopter/actions/workflows/contribution-policy-tests.yml/badge.svg)](https://github.com/thekidnamedkd/helicopter/actions/workflows/contribution-policy-tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-2563eb.svg)](LICENSE)
+
 AI can produce patches faster than maintainers can review them. More output does not mean more correct, useful, or trustworthy work. A generated change can pass syntax checks while missing the product intent, weakening a security boundary, or shifting review cost onto volunteers.
 
 Helicopter gives maintainers a clear view of ownership, provenance, risk, and queue pressure before they spend time on a patch. It keeps one person accountable for every contribution, rejects incomplete submissions early, and leaves merge authority with humans.
@@ -52,19 +55,123 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 
 Add an agent framework, AI reviewer, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
 
-## Use Helicopter in another repository
+## Before you start
 
-1. Copy the files that fit the target repository. Review existing community files before replacing them.
-2. Replace Helicopter's name, URLs, contacts, and CODEOWNERS with the adopting project's values.
-3. Adjust the DCO, issue-first categories, bot policy, and open-PR budget in `CONTRIBUTING.md`.
-4. Run:
+Both setup paths need:
 
-   ```sh
-   python3 tests/test_validate_pr.py
-   ```
+- [Git](https://git-scm.com/downloads);
+- Python 3.10 or newer;
+- the [GitHub CLI](https://github.com/cli/cli#installation); and
+- a GitHub account that can create the new repository or administer the existing one.
 
-5. Complete the GitHub settings in `MAINTAINERS.md`. Files alone do not create rulesets, PR limits, private vulnerability reporting, or security scanning.
-6. Open one valid and one deliberately invalid draft pull request before requiring `contribution-intake / validate-metadata`.
+Install `gh` with the official package for your platform:
+
+```sh
+# macOS
+brew install gh
+
+# Windows
+winget install --id GitHub.cli --source winget
+```
+
+Use the [official Linux packages](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) rather than copying an old distribution-specific command.
+
+Authenticate in a browser, then check the active account:
+
+```sh
+gh auth login --web
+gh auth status
+```
+
+Repository administration matters. The files can be added with write access, but rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require an administrator.
+
+## Start a new project with an agent
+
+Create a repository from Helicopter's template, choosing the correct owner, name, and visibility:
+
+```sh
+gh repo create OWNER/PROJECT \
+  --template thekidnamedkd/helicopter \
+  --private \
+  --clone
+cd PROJECT
+```
+
+Use `--public` instead of `--private` when the repository should be public. Then open the new directory in your coding agent and paste:
+
+```text
+Set up this new repository using Helicopter as its contribution and
+governance layer.
+
+Project:
+- Name: <PROJECT_NAME>
+- Purpose: <ONE_SENTENCE_PURPOSE>
+- Primary language/runtime: <STACK>
+- GitHub owner: <OWNER>
+- Maintainer or team: <CODEOWNER>
+- Security contact: <PRIVATE_CONTACT_OR_GITHUB_REPORTING_ROUTE>
+- Contribution agreement: <DCO_OR_CLA>
+- Repository visibility: <PUBLIC_OR_PRIVATE>
+
+Read README.md, CONTRIBUTING.md, MAINTAINERS.md, SECURITY.md,
+CODE_OF_CONDUCT.md, .github/, scripts/validate_pr.py, and its tests before
+editing. Keep Helicopter's accountable-human model, trusted-base metadata
+workflow, least-privilege permissions, and human-only merge authority.
+
+Adapt every Helicopter-specific name, URL, owner, contact, issue label, and
+contribution term to this project. Add the project's real build and test CI
+in a separate pull_request workflow. Do not check out or execute contributor
+code in the pull_request_target workflow. Add dependency manifests,
+lockfiles, release paths, security-sensitive code, generators, and agent
+instructions to CODEOWNERS where they exist.
+
+Run the validator tests and the project's own checks. Report the file changes,
+test results, and GitHub settings that still require an administrator. Do not
+claim that metadata validation proves a contribution is correct.
+```
+
+The prompt leaves product architecture to the agent and uses Helicopter only for contribution governance.
+
+## Add Helicopter to an existing repository
+
+Start from a clean working tree and confirm that `gh` points at the intended repository:
+
+```sh
+git status --short
+gh repo view
+gh auth status
+```
+
+Open the repository in your coding agent and paste:
+
+```text
+Integrate Helicopter from https://github.com/thekidnamedkd/helicopter into
+this existing repository.
+
+Audit the repository before editing. Preserve stronger existing contribution,
+security, conduct, ownership, and CI controls. Merge Helicopter's useful parts
+into existing files instead of overwriting them or creating a second policy.
+
+Identify the repository's maintainers, contribution agreement, private
+security route, issue labels, required checks, dependency and lock files,
+release paths, security-sensitive code, generators, and agent instructions.
+Adapt Helicopter's templates, CODEOWNERS entries, metadata validator, and
+workflows to those facts. Keep privileged intake metadata-only and run
+untrusted builds in a separate pull_request workflow without secrets.
+
+Run python3 tests/test_validate_pr.py plus the repository's existing checks.
+Show the final diff, test results, assumptions, and any GitHub settings an
+administrator must finish. Do not commit or push until the integration has
+been reviewed.
+```
+
+After either flow:
+
+1. Run `python3 tests/test_validate_pr.py`.
+2. Complete the settings in `MAINTAINERS.md`.
+3. Create the issue labels referenced by the forms.
+4. Open one valid and one deliberately invalid draft pull request.
+5. Require `contribution-intake / validate-metadata` only after both paths behave as expected.
 
 The default budget is two non-draft pull requests for contributors without write access. Treat that as a starting point and tune it from maintainer load and false refusals.
 
@@ -87,18 +194,27 @@ Helicopter cannot prove that:
 
 Rulesets, CODEOWNERS, independent CI, dependency and security checks, and human review remain the enforcement boundary.
 
-## Design basis
+## Contributing
 
-Helicopter is a smaller, working alternative to the generated starter in the supplied 2026 research. The research informed the design; it did not dictate the file structure or controls. Primary sources include:
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Every contribution needs an accountable human who can explain the change and respond to review.
+
+## Security
+
+Do not open public issues for vulnerabilities. Follow the private reporting instructions in [SECURITY.md](SECURITY.md).
+
+## Design principles and references
+
+Helicopter favors controls maintainers can inspect and enforce: accountable people, least-privilege automation, protected policy, independent CI, and human merge authority. These sources informed those choices:
 
 - [GitHub Actions secure-use guidance](https://docs.github.com/en/actions/reference/security/secure-use): minimum token permissions, immutable action SHAs, protected workflows, and no privileged execution of untrusted code.
 - [GitHub rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets): layered merge, review, and status-check controls.
 - [GitHub interaction and pull-request limits](https://docs.github.com/en/communities/moderating-comments-and-conversations/limiting-interactions-in-your-repository): platform backpressure for public repositories.
 - [OpenSSF's AI coding-assistant guidance](https://best.openssf.org/Security-Focused-Guide-for-AI-Code-Assistant-Instructions): developer responsibility and normal engineering controls still apply.
 - [OpenSSF's OSS-CRS review](https://openssf.org/blog/2026/04/02/from-aixcc-to-openssf-welcoming-oss-crs-to-advance-ai-driven-open-source-security/): automated validation did not establish semantic correctness for many reviewed AI patches.
+- [PyTorch's AI-assisted development guidance](https://github.com/pytorch/pytorch/blob/main/CONTRIBUTING.md#ai-assisted-development): contributors own the quality of their submissions, and new contributors start from a maintainer-triaged issue.
 - [Rust's LLM usage policy](https://forge.rust-lang.org/policies/llm-usage.html): AI review is not a substitute for required human review.
 - [Developer Certificate of Origin 1.1](https://developercertificate.org/): a human or organization, not a model, makes the legal certification.
 
 ## License
 
-MIT. Projects that adopt Helicopter keep their own license and contribution terms.
+Helicopter is released under the [MIT License](LICENSE).
