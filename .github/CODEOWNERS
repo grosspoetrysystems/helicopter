@@ -1,14 +1,14 @@
-# Replace both placeholders before requiring CODEOWNER review.
-* @ORG/MAINTAINERS
+# Helicopter currently has one owner. Adopting projects must replace it.
+* @thekidnamedkd
 
-/.github/workflows/ @ORG/SECURITY
-/.github/CODEOWNERS @ORG/SECURITY
-/scripts/validate_pr.py @ORG/SECURITY
-/tests/test_validate_pr.py @ORG/SECURITY
-/SECURITY.md @ORG/SECURITY
-/CONTRIBUTING.md @ORG/MAINTAINERS @ORG/SECURITY
-/MAINTAINERS.md @ORG/MAINTAINERS @ORG/SECURITY
-/CODE_OF_CONDUCT.md @ORG/MAINTAINERS
+/.github/workflows/ @thekidnamedkd
+/.github/CODEOWNERS @thekidnamedkd
+/scripts/validate_pr.py @thekidnamedkd
+/tests/test_validate_pr.py @thekidnamedkd
+/SECURITY.md @thekidnamedkd
+/CONTRIBUTING.md @thekidnamedkd
+/MAINTAINERS.md @thekidnamedkd
+/CODE_OF_CONDUCT.md @thekidnamedkd
 
 # Add project-specific owners for dependency manifests, lockfiles,
 # authentication/security code, release code, generators, and agent instructions.

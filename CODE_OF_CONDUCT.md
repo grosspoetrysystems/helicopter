@@ -1,4 +1,4 @@
-# Code of Conduct
+# Helicopter Code of Conduct
 
 ## Standard
 
@@ -10,10 +10,10 @@ Automation operators are responsible for their systems' behavior. Authorized bot
 
 ## Scope
 
-This policy applies in repository spaces and when someone publicly represents PROJECT_NAME.
+This policy applies in Helicopter's repository spaces and when someone publicly represents Helicopter.
 
 ## Reporting and enforcement
 
-Report conduct concerns privately to `conduct@PROJECT_DOMAIN`. Do not send vulnerability details to that address; use `SECURITY.md`.
+Report conduct concerns through [GitHub's private Report Abuse form](https://support.github.com/contact/report-abuse) and include the relevant Helicopter URL. Send vulnerability reports through `SECURITY.md` instead.
 
-Maintainers may edit or remove content, limit interactions, revoke automation authorization, or restrict participation to protect the project and its community. Enforcement decisions should be proportionate, documented privately when appropriate, and reviewable by a human who was not the sole target of the report when staffing permits.
+Helicopter's maintainers may edit or remove content, limit interactions, revoke automation authorization, or restrict participation to protect the project and its community. Enforcement decisions should be proportionate, documented privately when appropriate, and reviewable by a human who was not the sole target of the report when staffing permits.

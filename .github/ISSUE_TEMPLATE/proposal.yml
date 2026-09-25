@@ -1,5 +1,5 @@
 name: Work proposal
-description: Seek agreement before non-trivial implementation
+description: Propose a considered change to Helicopter
 title: "[Proposal]: "
 labels: ["needs-triage"]
 body:

@@ -1,12 +1,12 @@
-# Maintainer setup and operations
+# Maintaining and adopting Helicopter
 
-Repository files express policy; GitHub settings enforce it. Complete this checklist before relying on the starter.
+Helicopter's files express policy; GitHub settings enforce it. This guide covers this repository and projects that adopt its policy pack.
 
-## Bootstrap
+## Activate the repository
 
-- [ ] Replace `PROJECT_NAME`, `PROJECT_DOMAIN`, `@ORG/MAINTAINERS`, and `@ORG/SECURITY`.
-- [ ] Confirm DCO is the intended legal mechanism and configure its sign-off check, or replace it with the project's CLA/CA process.
-- [ ] Decide which bot or GitHub App identities, if any, may interact with the project.
+- [ ] When adopting Helicopter, replace its name, URLs, contacts, and CODEOWNERS with the target project's values.
+- [ ] Confirm DCO is the intended legal mechanism and configure its sign-off check, or replace it with the target project's CLA/CA process.
+- [ ] Decide which bot or GitHub App identities, if any, may interact with the repository.
 - [ ] Review the two-PR limit and issue-first categories in `CONTRIBUTING.md`.
 - [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
 - [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
@@ -29,11 +29,11 @@ Configure a ruleset for the default branch:
 
 For public repositories, set the concurrent non-draft PR limit for users without write access. Start at two unless maintainer capacity supports more; add trusted contributors to the bypass list deliberately.
 
-Enable the security features appropriate to the project and plan: private vulnerability reporting, dependency graph/review, secret scanning and push protection, code scanning, and release attestations/SBOMs.
+Enable the security features appropriate to the repository and plan: private vulnerability reporting, dependency graph/review, secret scanning and push protection, code scanning, and release attestations/SBOMs.
 
 ## Protect the policy plane
 
-`.github/CODEOWNERS` covers this starter's workflows, validator, and governance files. Add the project's dependency manifests, lockfiles, authentication/security paths, release code, code generators, and agent instruction files.
+`.github/CODEOWNERS` covers Helicopter's workflows, validator, and governance files. An adopting project should add its dependency manifests, lockfiles, authentication and security paths, release code, code generators, and agent instruction files.
 
 The metadata workflow uses `pull_request_target` because that event loads its workflow from the protected base repository. Its safety depends on four invariants:
 

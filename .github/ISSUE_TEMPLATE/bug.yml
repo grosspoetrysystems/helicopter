@@ -1,11 +1,11 @@
 name: Bug report
-description: Report a reproducible defect
+description: Report a reproducible defect in Helicopter
 title: "[Bug]: "
 labels: ["needs-triage"]
 body:
   - type: markdown
     attributes:
-      value: Do not report vulnerabilities here. Follow SECURITY.md.
+      value: Do not report Helicopter vulnerabilities here. Follow SECURITY.md.
   - type: textarea
     id: problem
     attributes:

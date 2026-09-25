@@ -1,5 +1,5 @@
 name: Automation authorization
-description: Request approval for a bot or autonomous contributor
+description: Request approval for a bot or autonomous contributor to Helicopter
 title: "[Automation]: "
 labels: ["automation-review"]
 body:

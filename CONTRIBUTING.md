@@ -1,6 +1,6 @@
-# Contributing to PROJECT_NAME
+# Contributing to Helicopter
 
-Human-authored, AI-assisted, and agent-authored work is welcome when it is useful, reviewable, and owned by an accountable person.
+Helicopter welcomes human-authored, AI-assisted, and agent-authored work when it is useful, reviewable, and owned by an accountable person.
 
 ## Human accountability
 
@@ -10,7 +10,7 @@ Every pull request needs an accountable human contributor. By submitting one, yo
 - understand and can explain the change;
 - verified the evidence reported in the pull request;
 - can revise the contribution in response to review; and
-- have the right to submit it under this project's license and contribution terms.
+- have the right to submit it under Helicopter's license and contribution terms.
 
 AI assistance does not transfer those responsibilities to a model, provider, agent, bot, or tool.
 
@@ -35,7 +35,7 @@ An agent must not:
 - change policy or security controls merely to make its own work pass;
 - use repository or deployment secrets in untrusted contribution CI;
 - post substantive answers as though they were the accountable human's judgment; or
-- flood the project with speculative, duplicate, or unrelated submissions.
+- flood Helicopter with speculative, duplicate, or unrelated submissions.
 
 Maintainers moderate observable behavior and policy violations, not guesses that writing “looks AI-generated.”
 
@@ -51,7 +51,7 @@ Open or reference an accepted issue before starting:
 
 Small bug fixes, documentation corrections, and focused maintenance may skip issue-first review unless a maintainer says otherwise.
 
-Unapproved bots and autonomous agents must not open issues, pull requests, reviews, or comments. Request authorization with the **Automation authorization** issue form before they interact with the project.
+Unapproved bots and autonomous agents must not open issues, pull requests, reviews, or comments. Their accountable operator must request authorization with the **Automation authorization** issue form before they interact with Helicopter.
 
 ## Pull request contract
 
@@ -70,19 +70,19 @@ Contributors without write access may have at most **two non-draft pull requests
 
 ## Review
 
-Project CI independently reruns relevant checks. Contributor and agent reports are useful context, not authoritative evidence. AI review is advisory and cannot replace required human approval.
+Helicopter independently reruns relevant checks. Contributor and agent reports are useful context, not authoritative evidence. AI review is advisory and cannot replace required human approval.
 
 Changes to workflows, security, authentication, dependencies, release machinery, contribution policy, or agent instructions require the owners named in `.github/CODEOWNERS`.
 
 ## Legal
 
-This project uses [Developer Certificate of Origin 1.1](https://developercertificate.org/). Sign off every commit:
+Helicopter uses [Developer Certificate of Origin 1.1](https://developercertificate.org/). Sign off every commit:
 
 ```text
 Signed-off-by: Your Name <your.email@example.com>
 ```
 
-The accountable human or authorized organization, not an AI system, makes that certification. Projects using a CLA or other contribution agreement must replace this section and configure the corresponding check.
+The accountable human or authorized organization, not an AI system, makes that certification. A project adopting Helicopter with a CLA or another contribution agreement must replace this section and configure the corresponding check.
 
 ## Security and conduct
 

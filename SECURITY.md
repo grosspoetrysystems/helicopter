@@ -1,10 +1,10 @@
-# Security policy
+# Helicopter security policy
 
 ## Report privately
 
 Do not open a public issue for a suspected vulnerability, exposed credential, malicious dependency, compromised automation identity, or workflow/runner compromise.
 
-Use GitHub private vulnerability reporting for this repository. If it is unavailable, contact `security@PROJECT_DOMAIN`.
+Use [GitHub private vulnerability reporting](https://github.com/thekidnamedkd/helicopter/security/advisories/new) for Helicopter. Do not include vulnerability details in a public issue or discussion.
 
 Include what you can safely provide:
 
@@ -18,4 +18,4 @@ Remove credentials and personal data from attachments. Do not run a suspicious c
 
 ## Response
 
-Maintainers will acknowledge receipt, establish a private communication path, contain active risk, and coordinate disclosure. Response time depends on project capacity and severity; no fixed service level is promised here.
+Helicopter's maintainers will acknowledge receipt, establish a private communication path, contain active risk, and coordinate disclosure. Response time depends on capacity and severity; Helicopter does not promise a fixed service level.
