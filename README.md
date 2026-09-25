@@ -67,125 +67,21 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 
 Add an agent framework, AI reviewer, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
 
-## Before you start
+## Install with an agent
 
-Both setup paths need:
-
-- [Git](https://git-scm.com/downloads);
-- Python 3.10 or newer;
-- the [GitHub CLI](https://github.com/cli/cli#installation); and
-- a GitHub account that can create the new repository or administer the existing one.
-
-Install `gh` with the official package for your platform:
-
-```sh
-# macOS
-brew install gh
-
-# Windows
-winget install --id GitHub.cli --source winget
-```
-
-Use the [official Linux packages](https://github.com/cli/cli/blob/trunk/docs/install_linux.md) rather than copying an old distribution-specific command.
-
-Authenticate in a browser, then check the active account:
+You need [Git](https://git-scm.com/downloads), Python 3.10 or newer, the [GitHub CLI](https://github.com/cli/cli#installation), and access to the target GitHub account:
 
 ```sh
 gh auth login --web
 gh auth status
 ```
 
-Repository administration matters. The files can be added with write access, but rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require an administrator.
+Choose the guide that matches the repository:
 
-## Start a new project with an agent
+- [Start a new repository](docs/start-new-repository.md)
+- [Add Helicopter to an existing repository](docs/add-to-existing-repository.md)
 
-Create a repository from Helicopter's template, choosing the correct owner, name, and visibility:
-
-```sh
-gh repo create OWNER/PROJECT \
-  --template thekidnamedkd/helicopter \
-  --private \
-  --clone
-cd PROJECT
-```
-
-Use `--public` instead of `--private` when the repository should be public. Then open the new directory in your coding agent and paste:
-
-```text
-Set up this new repository using Helicopter as its contribution and
-governance layer.
-
-Project:
-- Name: <PROJECT_NAME>
-- Purpose: <ONE_SENTENCE_PURPOSE>
-- Primary language/runtime: <STACK>
-- GitHub owner: <OWNER>
-- Maintainer or team: <CODEOWNER>
-- Security contact: <PRIVATE_CONTACT_OR_GITHUB_REPORTING_ROUTE>
-- Contribution agreement: <DCO_OR_CLA>
-- Repository visibility: <PUBLIC_OR_PRIVATE>
-
-Read README.md, CONTRIBUTING.md, MAINTAINERS.md, SECURITY.md,
-CODE_OF_CONDUCT.md, .github/, scripts/validate_pr.py, and its tests before
-editing. Keep Helicopter's accountable-human model, trusted-base metadata
-workflow, least-privilege permissions, and human-only merge authority.
-
-Adapt every Helicopter-specific name, URL, owner, contact, issue label, and
-contribution term to this project. Add the project's real build and test CI
-in a separate pull_request workflow. Do not check out or execute contributor
-code in the pull_request_target workflow. Add dependency manifests,
-lockfiles, release paths, security-sensitive code, generators, and agent
-instructions to CODEOWNERS where they exist.
-
-Run the validator tests and the project's own checks. Report the file changes,
-test results, and GitHub settings that still require an administrator. Do not
-claim that metadata validation proves a contribution is correct.
-```
-
-The prompt leaves product architecture to the agent and uses Helicopter only for contribution governance.
-
-## Add Helicopter to an existing repository
-
-Start from a clean working tree and confirm that `gh` points at the intended repository:
-
-```sh
-git status --short
-gh repo view
-gh auth status
-```
-
-Open the repository in your coding agent and paste:
-
-```text
-Integrate Helicopter from https://github.com/thekidnamedkd/helicopter into
-this existing repository.
-
-Audit the repository before editing. Preserve stronger existing contribution,
-security, conduct, ownership, and CI controls. Merge Helicopter's useful parts
-into existing files instead of overwriting them or creating a second policy.
-
-Identify the repository's maintainers, contribution agreement, private
-security route, issue labels, required checks, dependency and lock files,
-release paths, security-sensitive code, generators, and agent instructions.
-Adapt Helicopter's templates, CODEOWNERS entries, metadata validator, and
-workflows to those facts. Keep privileged intake metadata-only and run
-untrusted builds in a separate pull_request workflow without secrets.
-
-Run python3 tests/test_validate_pr.py plus the repository's existing checks.
-Show the final diff, test results, assumptions, and any GitHub settings an
-administrator must finish. Do not commit or push until the integration has
-been reviewed.
-```
-
-After either flow:
-
-1. Run `python3 tests/test_validate_pr.py`.
-2. Complete the settings in `MAINTAINERS.md`.
-3. Create the issue labels referenced by the forms.
-4. Open one valid and one deliberately invalid draft pull request.
-5. Require `contribution-intake / validate-metadata` only after both paths behave as expected.
-
-The default budget is two non-draft pull requests for contributors without write access. Treat that as a starting point and tune it from maintainer load and false refusals.
+Each guide has a copyable agent prompt and a final GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
 
 ## Trust boundary
 
