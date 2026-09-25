@@ -33,6 +33,18 @@ Helicopter adds a small policy layer to the normal GitHub pull request flow:
 4. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
 5. Maintainers get one actionable refusal path when required context is missing.
 
+```mermaid
+flowchart LR
+    A["Human, AI-assisted,<br/>or agent-authored change"] --> B["Pull request contract"]
+    B --> C{"Trusted-base<br/>metadata check"}
+    C -->|"Missing context"| D["Actionable refusal"]
+    D --> B
+    C -->|"Admitted"| E["Independent project CI"]
+    E --> F["CODEOWNERS + human review"]
+    F --> G{"Protected ruleset"}
+    G -->|"Approved"| H["Human merge"]
+```
+
 The validator checks whether declarations are present and internally consistent. It does not decide whether a patch is correct or whether a claim is true.
 
 ## Who it considers
@@ -212,6 +224,7 @@ Helicopter favors controls maintainers can inspect and enforce: accountable peop
 - [OpenSSF's AI coding-assistant guidance](https://best.openssf.org/Security-Focused-Guide-for-AI-Code-Assistant-Instructions): developer responsibility and normal engineering controls still apply.
 - [OpenSSF's OSS-CRS review](https://openssf.org/blog/2026/04/02/from-aixcc-to-openssf-welcoming-oss-crs-to-advance-ai-driven-open-source-security/): automated validation did not establish semantic correctness for many reviewed AI patches.
 - [PyTorch's AI-assisted development guidance](https://github.com/pytorch/pytorch/blob/main/CONTRIBUTING.md#ai-assisted-development): contributors own the quality of their submissions, and new contributors start from a maintainer-triaged issue.
+- [LLVM's AI tool-use policy](https://github.com/llvm/llvm-project/blob/main/llvm/docs/AIToolPolicy.md): contributors remain accountable, substantial tool use is disclosed, and autonomous participation requires explicit project approval.
 - [Rust's LLM usage policy](https://forge.rust-lang.org/policies/llm-usage.html): AI review is not a substitute for required human review.
 - [Developer Certificate of Origin 1.1](https://developercertificate.org/): a human or organization, not a model, makes the legal certification.
 
