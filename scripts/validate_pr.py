@@ -46,6 +46,32 @@ class Refusal:
     code: str
     message: str
 
+def _solo_maintainer(event: dict[str, Any]) -> bool:
+    pull_request = event.get("pull_request") or {}
+    author = pull_request.get("user") or {}
+    base_repository = (pull_request.get("base") or {}).get("repo") or {}
+    head_repository = (pull_request.get("head") or {}).get("repo") or {}
+    repository = event.get("repository") or {}
+    owner = base_repository.get("owner") or {}
+    sender = event.get("sender") or {}
+    owner_id = owner.get("id")
+    repository_id = repository.get("id")
+
+    return (
+        type(owner_id) is int
+        and owner_id > 0
+        and type(repository_id) is int
+        and repository_id > 0
+        and author.get("type") == "User"
+        and owner.get("type") == "User"
+        and sender.get("type") == "User"
+        and author.get("id") == owner_id
+        and sender.get("id") == owner_id
+        and base_repository.get("id") == repository_id
+        and head_repository.get("id") == repository_id
+    )
+
+
 
 def _checked(body: str, label: str) -> bool:
     return re.search(rf"^- \[[xX]\] {re.escape(label)}\s*$", body, re.MULTILINE) is not None
@@ -191,6 +217,12 @@ def validate_body(body: str) -> list[Refusal]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("event", type=Path, help="GitHub pull request event JSON")
+    parser.add_argument(
+        "--solo-maintainer-mode",
+        choices=("false", "true"),
+        default="false",
+        help="exempt only the personal repository owner when set to true",
+    )
     args = parser.parse_args()
 
     try:
@@ -198,6 +230,10 @@ def main() -> int:
     except (OSError, json.JSONDecodeError) as error:
         print(f"REFUSE_EVENT_INVALID: {error}")
         return 2
+
+    if args.solo_maintainer_mode == "true" and _solo_maintainer(event):
+        print("Solo-maintainer metadata exemption accepted for the repository owner.")
+        return 0
 
     body = (event.get("pull_request") or {}).get("body") or ""
     refusals = validate_body(body)

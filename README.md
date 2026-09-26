@@ -29,7 +29,7 @@ Helicopter adds a small policy layer to the normal GitHub pull request flow:
 
 1. The contributor names an accountable human and declares how the work was produced.
 2. Agent-authored work includes identity, run, base commit, and capability metadata.
-3. A metadata-only workflow runs the validator from the protected base commit.
+3. A metadata-only workflow runs the validator from the protected default branch.
 4. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
 5. Maintainers get one actionable refusal path when required context is missing.
 
@@ -91,6 +91,7 @@ to configure this project:
 - Maintainer or team: <CODEOWNER>
 - Private security contact: <CONTACT_OR_GITHUB_PRIVATE_REPORTING>
 - Contribution agreement: <DCO_OR_CLA>
+- Maintainer mode: <SOLO_OR_MULTI>
 ```
 
 ### Existing repository
@@ -98,9 +99,13 @@ to configure this project:
 ```text
 Follow https://github.com/thekidnamedkd/helicopter/blob/main/docs/add-to-existing-repository.md
 to install Helicopter in the current repository.
+
+Maintainer mode: <SOLO_OR_MULTI>
 ```
 
 The linked guides contain the implementation rules, verification steps, and GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
+
+Running the project alone? [Solo-maintainer mode](docs/solo-maintainer-administration.md) exempts only a personal repository's owner from contribution metadata while leaving CI and repository protections in place.
 
 ## Trust boundary
 

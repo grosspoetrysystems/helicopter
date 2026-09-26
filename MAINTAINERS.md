@@ -10,6 +10,7 @@ Helicopter's files express policy; GitHub settings enforce it. This guide covers
 - [ ] Review the two-PR limit and issue-first categories in `CONTRIBUTING.md`.
 - [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
 - [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
+- [ ] For a user-owned repository with one maintainer, decide whether to enable [solo-maintainer mode](docs/solo-maintainer-administration.md); disable it when another maintainer joins.
 - [ ] Publish reachable private security and conduct contacts.
 
 ## GitHub settings
@@ -35,9 +36,9 @@ Enable the security features appropriate to the repository and plan: private vul
 
 `.github/CODEOWNERS` covers Helicopter's workflows, validator, and governance files. An adopting project should add its dependency manifests, lockfiles, authentication and security paths, release code, code generators, and agent instruction files.
 
-The metadata workflow uses `pull_request_target` because that event loads its workflow from the protected base repository. Its safety depends on four invariants:
+The metadata workflow uses `pull_request_target` because that event loads its workflow from the protected default branch. Its safety depends on four invariants:
 
-1. only event metadata and protected-base files are read;
+1. only event metadata and protected default-branch files are read;
 2. the contributor head is never checked out or executed;
 3. no secret is referenced; and
 4. token permissions remain read-only.

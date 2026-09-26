@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+# An unset repository variable is false. Enabling it can exempt only the
+# human owner of a user-owned repository on a same-repository pull request.
+env:
+  HELICOPTER_SOLO_MAINTAINER_MODE: ${{ vars.HELICOPTER_SOLO_MAINTAINER_MODE == 'true' && 'true' || 'false' }}
+
 concurrency:
   group: contribution-intake-${{ github.event.pull_request.number }}
   cancel-in-progress: true
@@ -16,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Check out validator from protected base commit
+      - name: Check out validator from protected default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.repository.default_branch }}
           path: trusted-base
           persist-credentials: false
           sparse-checkout: scripts
@@ -28,7 +33,7 @@ jobs:
       - name: Validate pull request metadata
         env:
           EVENT_PATH: ${{ github.event_path }}
-        run: python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH"
+        run: python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH" --solo-maintainer-mode "$HELICOPTER_SOLO_MAINTAINER_MODE"
 
       # Security invariant: this privileged event must never check out or execute
       # the pull request head. Project builds/tests belong in a separate

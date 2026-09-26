@@ -62,6 +62,40 @@ Capabilities:
 ```
 """
 
+def run_cli(event: dict[str, object], *arguments: str) -> subprocess.CompletedProcess[str]:
+    with tempfile.TemporaryDirectory() as directory:
+        event_path = Path(directory) / "event.json"
+        event_path.write_text(json.dumps(event), encoding="utf-8")
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), str(event_path), *arguments],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+
+def owner_event(
+    *,
+    author_id: int = 1,
+    author_type: str = "User",
+    owner_type: str = "User",
+    sender_id: int = 1,
+    sender_type: str = "User",
+    event_repository_id: int = 100,
+    head_repository_id: int = 100,
+) -> dict[str, object]:
+    return {
+        "repository": {"id": event_repository_id},
+        "sender": {"id": sender_id, "type": sender_type},
+        "pull_request": {
+            "body": "",
+            "user": {"id": author_id, "type": author_type},
+            "base": {"repo": {"id": 100, "owner": {"id": 1, "type": owner_type}}},
+            "head": {"repo": {"id": head_repository_id}},
+        },
+    }
+
+
 
 def codes(body: str) -> set[str]:
     return {refusal.code for refusal in validate_body(body)}
@@ -136,18 +170,33 @@ class ValidateBodyTests(unittest.TestCase):
         self.assertEqual(codes(body), set())
 
     def test_cli_accepts_a_valid_event(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            event = Path(directory) / "event.json"
-            event.write_text(json.dumps({"pull_request": {"body": VALID_HUMAN}}), encoding="utf-8")
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT), str(event)],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
+        result = run_cli({"pull_request": {"body": VALID_HUMAN}})
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Human review is still required", result.stdout)
+
+    def test_solo_maintainer_mode_only_exempts_repository_owner(self) -> None:
+        owner = owner_event()
+        disabled = run_cli(owner)
+        self.assertEqual(disabled.returncode, 1, disabled.stdout + disabled.stderr)
+
+        cases = {
+            "owner": (owner, 0),
+            "wrong account": (owner_event(author_id=2), 1),
+            "bot": (owner_event(author_type="Bot"), 1),
+            "organization": (owner_event(owner_type="Organization"), 1),
+            "wrong repository": (owner_event(event_repository_id=101), 1),
+            "collaborator sender": (owner_event(sender_id=2), 1),
+            "bot sender": (owner_event(sender_type="Bot"), 1),
+            "fork": (owner_event(head_repository_id=101), 1),
+        }
+        for name, (event, expected_code) in cases.items():
+            with self.subTest(name=name):
+                result = run_cli(event, "--solo-maintainer-mode", "true")
+                self.assertEqual(result.returncode, expected_code, result.stdout + result.stderr)
+
+        accepted = run_cli(owner, "--solo-maintainer-mode", "true")
+        self.assertIn("repository owner", accepted.stdout)
 
 
 if __name__ == "__main__":
