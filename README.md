@@ -151,3 +151,5 @@ Helicopter favors controls maintainers can inspect and enforce: accountable peop
 ## License
 
 Helicopter is released under the [MIT License](LICENSE).
+
+<!-- Temporary live verification; do not merge. -->
