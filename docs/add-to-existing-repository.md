@@ -34,6 +34,7 @@ agreement, private security route, labels, required checks, dependencies,
 lockfiles, release paths, security-sensitive code, generators, and agent
 instructions. Keep privileged intake metadata-only. Run untrusted builds in a
 separate pull_request workflow without secrets.
+
 If maintainer mode is SOLO, import and follow
 docs/solo-maintainer-administration.md, but leave its repository variable unset
 until the acceptance and refusal checks below pass. Leave it unset for MULTI.

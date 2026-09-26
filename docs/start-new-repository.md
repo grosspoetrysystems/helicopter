@@ -50,6 +50,7 @@ default-branch metadata; never check out or execute pull-request code in `pull_r
 Add project build and test CI in a separate pull_request workflow. Extend
 CODEOWNERS for dependencies, lockfiles, release paths, security-sensitive code,
 generators, and agent instructions that exist in this project.
+
 If maintainer mode is SOLO, follow docs/solo-maintainer-administration.md, but
 leave its repository variable unset until the acceptance and refusal checks
 below pass. Leave it unset for MULTI.

@@ -62,6 +62,7 @@ Capabilities:
 ```
 """
 
+
 def run_cli(event: dict[str, object], *arguments: str) -> subprocess.CompletedProcess[str]:
     with tempfile.TemporaryDirectory() as directory:
         event_path = Path(directory) / "event.json"
@@ -94,7 +95,6 @@ def owner_event(
             "head": {"repo": {"id": head_repository_id}},
         },
     }
-
 
 
 def codes(body: str) -> set[str]:

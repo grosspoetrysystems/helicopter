@@ -46,6 +46,7 @@ class Refusal:
     code: str
     message: str
 
+
 def _solo_maintainer(event: dict[str, Any]) -> bool:
     pull_request = event.get("pull_request") or {}
     author = pull_request.get("user") or {}
@@ -70,7 +71,6 @@ def _solo_maintainer(event: dict[str, Any]) -> bool:
         and base_repository.get("id") == repository_id
         and head_repository.get("id") == repository_id
     )
-
 
 
 def _checked(body: str, label: str) -> bool:
