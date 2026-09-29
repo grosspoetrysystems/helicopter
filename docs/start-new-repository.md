@@ -20,7 +20,7 @@ Choose the owner, name, and visibility:
 
 ```sh
 gh repo create OWNER/PROJECT \
-  --template thekidnamedkd/helicopter \
+  --template grosspoetrysystems/helicopter \
   --private \
   --clone
 cd PROJECT

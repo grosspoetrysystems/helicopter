@@ -4,7 +4,7 @@
 
 Governance and intake for open source projects working with human, AI-assisted, and agent-authored contributions.
 
-[![Contribution policy tests](https://github.com/thekidnamedkd/helicopter/actions/workflows/contribution-policy-tests.yml/badge.svg)](https://github.com/thekidnamedkd/helicopter/actions/workflows/contribution-policy-tests.yml)
+[![Contribution policy tests](https://github.com/grosspoetrysystems/helicopter/actions/workflows/contribution-policy-tests.yml/badge.svg)](https://github.com/grosspoetrysystems/helicopter/actions/workflows/contribution-policy-tests.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-2563eb.svg)](LICENSE)
 
 AI can produce patches faster than maintainers can review them. More output does not mean more correct, useful, or trustworthy work. A generated change can pass syntax checks while missing the product intent, weakening a security boundary, or shifting review cost onto volunteers.
@@ -81,7 +81,7 @@ Copy the prompt for the path you need.
 ### New repository
 
 ```text
-Follow https://github.com/thekidnamedkd/helicopter/blob/main/docs/start-new-repository.md
+Follow https://github.com/grosspoetrysystems/helicopter/blob/main/docs/start-new-repository.md
 to configure this project:
 
 - Name: <PROJECT_NAME>
@@ -97,7 +97,7 @@ to configure this project:
 ### Existing repository
 
 ```text
-Follow https://github.com/thekidnamedkd/helicopter/blob/main/docs/add-to-existing-repository.md
+Follow https://github.com/grosspoetrysystems/helicopter/blob/main/docs/add-to-existing-repository.md
 to install Helicopter in the current repository.
 
 Maintainer mode: <SOLO_OR_MULTI>

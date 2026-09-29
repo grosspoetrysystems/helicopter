@@ -1,7 +1,7 @@
 blank_issues_enabled: false
 contact_links:
   - name: Report a Helicopter vulnerability
-    url: https://github.com/thekidnamedkd/helicopter/security/advisories/new
+    url: https://github.com/grosspoetrysystems/helicopter/security/advisories/new
     about: Send security reports privately.
   - name: Report conduct or abuse
     url: https://support.github.com/contact/report-abuse

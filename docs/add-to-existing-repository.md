@@ -21,7 +21,7 @@ Open the repository in your coding agent and paste:
 
 ```text
 Integrate the contribution controls from
-https://github.com/thekidnamedkd/helicopter into this repository.
+https://github.com/grosspoetrysystems/helicopter into this repository.
 
 Maintainer mode: <SOLO_OR_MULTI>
 

@@ -4,7 +4,7 @@
 
 Do not open a public issue for a suspected vulnerability, exposed credential, malicious dependency, compromised automation identity, or workflow/runner compromise.
 
-Use [GitHub private vulnerability reporting](https://github.com/thekidnamedkd/helicopter/security/advisories/new) for Helicopter. Do not include vulnerability details in a public issue or discussion.
+Use [GitHub private vulnerability reporting](https://github.com/grosspoetrysystems/helicopter/security/advisories/new) for Helicopter. Do not include vulnerability details in a public issue or discussion.
 
 Include what you can safely provide:
 
