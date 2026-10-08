@@ -58,6 +58,15 @@ def configure(repository: str, mode: str) -> None:
         for item in json.loads(gh("variable", "list", "--json", "name", "--repo", repository))
     }
 
+    if "HELICOPTER_SOLO_MAINTAINER_MODE" in variables:
+        gh(
+            "variable",
+            "delete",
+            "HELICOPTER_SOLO_MAINTAINER_MODE",
+            "--repo",
+            repository,
+        )
+
     # Disable exemptions before tightening non-solo modes.
     if mode != "solo":
         set_variable(repository, "HELICOPTER_MODE", "contributor")
