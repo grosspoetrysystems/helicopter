@@ -47,7 +47,7 @@ class Refusal:
     message: str
 
 
-def _solo_maintainer(event: dict[str, Any]) -> bool:
+def _solo_maintainer(event: dict[str, Any], maintainer_id: int) -> bool:
     pull_request = event.get("pull_request") or {}
     author = pull_request.get("user") or {}
     base_repository = (pull_request.get("base") or {}).get("repo") or {}
@@ -56,18 +56,22 @@ def _solo_maintainer(event: dict[str, Any]) -> bool:
     owner = base_repository.get("owner") or {}
     sender = event.get("sender") or {}
     owner_id = owner.get("id")
+    owner_type = owner.get("type")
     repository_id = repository.get("id")
 
     return (
-        type(owner_id) is int
+        type(maintainer_id) is int
+        and maintainer_id > 0
+        and type(owner_id) is int
         and owner_id > 0
+        and owner_type in {"User", "Organization"}
+        and (owner_type == "Organization" or owner_id == maintainer_id)
         and type(repository_id) is int
         and repository_id > 0
         and author.get("type") == "User"
-        and owner.get("type") == "User"
         and sender.get("type") == "User"
-        and author.get("id") == owner_id
-        and sender.get("id") == owner_id
+        and author.get("id") == maintainer_id
+        and sender.get("id") == maintainer_id
         and base_repository.get("id") == repository_id
         and head_repository.get("id") == repository_id
     )
@@ -221,7 +225,12 @@ def main() -> int:
         "--solo-maintainer-mode",
         choices=("false", "true"),
         default="false",
-        help="exempt only the personal repository owner when set to true",
+        help="exempt only the configured sole maintainer when set to true",
+    )
+    parser.add_argument(
+        "--solo-maintainer-id",
+        default="",
+        help="immutable numeric GitHub user ID authorized for solo-maintainer mode",
     )
     args = parser.parse_args()
 
@@ -231,8 +240,13 @@ def main() -> int:
         print(f"REFUSE_EVENT_INVALID: {error}")
         return 2
 
-    if args.solo_maintainer_mode == "true" and _solo_maintainer(event):
-        print("Solo-maintainer metadata exemption accepted for the repository owner.")
+    if re.fullmatch(r"[1-9][0-9]*", args.solo_maintainer_id):
+        solo_maintainer_id = int(args.solo_maintainer_id)
+    else:
+        solo_maintainer_id = 0
+
+    if args.solo_maintainer_mode == "true" and _solo_maintainer(event, solo_maintainer_id):
+        print("Solo-maintainer metadata exemption accepted for the configured maintainer.")
         return 0
 
     body = (event.get("pull_request") or {}).get("body") or ""

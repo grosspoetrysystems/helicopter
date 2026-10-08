@@ -105,7 +105,7 @@ Maintainer mode: <SOLO_OR_MULTI>
 
 The linked guides contain the implementation rules, verification steps, and GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
 
-Running the project alone? [Solo-maintainer mode](docs/solo-maintainer-administration.md) exempts only a personal repository's owner from contribution metadata while leaving CI and repository protections in place.
+Running the project alone? [Solo-maintainer mode](docs/solo-maintainer-administration.md) exempts one configured maintainer in a personal or organization-owned repository from contribution metadata while leaving CI and repository protections in place.
 
 ## Trust boundary
 

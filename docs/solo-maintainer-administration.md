@@ -1,45 +1,52 @@
 # Solo-maintainer administration
 
-Helicopter's contributor controls protect a maintainer from untrusted submissions. They should not turn the sole owner into an external contributor to their own repository.
+Helicopter's contributor controls protect a maintainer from untrusted submissions. They should not turn the sole maintainer into an external contributor to their own repository.
 
-Solo-maintainer mode is disabled by default. It exempts only the owner of a personal repository from Helicopter's pull-request metadata contract. It does not bypass project CI, release controls, or GitHub rulesets.
+Solo-maintainer mode is disabled by default. It exempts one configured human maintainer of a personal or organization-owned repository from Helicopter's pull-request metadata contract. It does not bypass project CI, release controls, or GitHub rulesets.
 
 ## Enable solo-maintainer mode
 
-Set the Actions repository variable from the repository directory:
+After the repository exists, set both Actions repository variables:
 
 ```sh
-gh variable set HELICOPTER_SOLO_MAINTAINER_MODE --body true
+REPOSITORY=$(gh repo view --json nameWithOwner --jq .nameWithOwner)
+MAINTAINER_ID=$(gh api user --jq .id)
+gh variable set HELICOPTER_SOLO_MAINTAINER_ID --body "$MAINTAINER_ID" --repo "$REPOSITORY"
+gh variable set HELICOPTER_SOLO_MAINTAINER_MODE --body true --repo "$REPOSITORY"
 ```
 
-The intake workflow accepts the exemption only when all of these event fields agree:
+Set these variables on the repository, never at organization scope. GitHub includes organization variables in the same `vars` context; organization-scoped solo-mode variables could affect every repository that inherits them.
 
-1. the pull-request author, event sender, and base-repository owner have the same immutable numeric account ID;
-2. all three accounts are type `User`, not `Bot` or `Organization`;
-3. the event repository and pull-request base repository have the same repository ID;
-4. the head repository has that same ID, so the pull request is not from a fork.
+The intake workflow accepts the exemption only when all of these event fields and settings agree:
 
-The variable is repository configuration, not template content, so repositories created from Helicopter do not inherit it. Pull requests cannot set it, and even a collaborator who can change repository variables cannot exempt their own account because the validator still requires the repository owner's immutable ID.
+1. `HELICOPTER_SOLO_MAINTAINER_ID` is a positive decimal GitHub user ID;
+2. the pull-request author and event sender are both type `User` with that immutable ID;
+3. for a personal repository, that ID is also the repository owner's ID;
+4. for an organization-owned repository, the configured user is the explicitly authorized sole maintainer;
+5. the event repository and pull-request base and head repositories have the same repository ID, so the pull request is not from a fork.
 
-Delete the variable before requiring another maintainer to follow the normal contributor path:
+The variables are repository configuration, not template content, so repositories created from Helicopter do not inherit them. Pull requests cannot set them. A repository administrator can change them, but that administrator already controls repository settings and workflows.
+
+Delete both variables before requiring another maintainer to follow the normal contributor path:
 
 ```sh
-gh variable delete HELICOPTER_SOLO_MAINTAINER_MODE
+gh variable delete HELICOPTER_SOLO_MAINTAINER_MODE --repo "$REPOSITORY"
+gh variable delete HELICOPTER_SOLO_MAINTAINER_ID --repo "$REPOSITORY"
 ```
 
 ## What the mode changes
 
 - **Required CI** still proves a commit passed repository checks.
-- **Contributor admission** still requires provenance, attestations, and maintainer review from contributors, bots, organizations, and forks.
-- **Owner authority** may skip only Helicopter's metadata form when the sole owner opens a pull request from the governed repository.
+- **Contributor admission** still requires provenance, attestations, and maintainer review from other contributors, bots, and forks.
+- **Maintainer authority** may skip only Helicopter's metadata form when the configured sole maintainer opens a pull request from the governed repository.
 
 The exemption returns success before parsing the pull-request body. It does not auto-check human attestations or invent provenance. Keep contributor, fork, and bot paths unchanged.
 
-## Pull requests are optional for the owner
+## Pull requests are optional for the maintainer
 
-A pull request remains useful for a web diff, pre-merge CI, discussion, and a merge boundary. It is not the sole owner's security boundary.
+A pull request remains useful for a web diff, pre-merge CI, discussion, and a merge boundary. It is not the sole maintainer's security boundary.
 
-A direct administrator push is appropriate when the owner has reviewed a small change locally and accepts that required checks run after the commit reaches the default branch. With classic branch protection and administrator enforcement disabled, GitHub reports that the push bypassed expected checks; this is the configured owner authority, not proof that checks ran before landing.
+A direct administrator push is appropriate when the maintainer has reviewed a small change locally and accepts that required checks run after the commit reaches the default branch. With classic branch protection and administrator enforcement disabled, GitHub reports that the push bypassed expected checks; this is configured maintainer authority, not proof that checks ran before landing.
 
 Do not attach production publication to every default-branch push merely because direct pushes are allowed. Separate:
 
@@ -109,9 +116,9 @@ gh api repos/OWNER/REPO/branches/main/protection/required_status_checks \
 
 A metadata intake workflow commonly uses `pull_request_target`. It must load its validator from `github.event.repository.default_branch`, not the pull request's target branch. This keeps the validator on a maintainer-controlled commit even for stacked pull requests that target another branch.
 
-The workflow and validator wiring that reads `HELICOPTER_SOLO_MAINTAINER_MODE` must already exist on the protected default branch. The repository variable is read at run time, so `gh variable set` takes effect on the next pull-request event.
+The workflow and validator wiring that reads `HELICOPTER_SOLO_MAINTAINER_MODE` and `HELICOPTER_SOLO_MAINTAINER_ID` must already exist on the protected default branch. Repository variables are read at run time, so `gh variable set` takes effect on the next pull-request event.
 
-Until that wiring reaches the default branch, the owner's pull request follows the normal metadata contract. Complete the template rather than inventing an agent run ID or auto-checking attestations.
+Until that wiring reaches the default branch, the maintainer's pull request follows the normal metadata contract. Complete the template rather than inventing an agent run ID or auto-checking attestations.
 
 ## Stacked pull requests
 
@@ -133,9 +140,9 @@ Use merge commits for a stacked bootstrap when preserving the bottom branch's co
 
 ## When a second maintainer joins
 
-Re-enable required approving reviews and CODEOWNERS enforcement when another eligible human can review the owner's pull requests. At that point:
+Re-enable required approving reviews and CODEOWNERS enforcement when another eligible human can review the maintainer's pull requests. At that point:
 
-1. delete the `HELICOPTER_SOLO_MAINTAINER_MODE` repository variable;
+1. delete the `HELICOPTER_SOLO_MAINTAINER_MODE` and `HELICOPTER_SOLO_MAINTAINER_ID` repository variables;
 2. require at least one approval;
 3. require CODEOWNERS review for protected paths;
 4. decide whether the last pusher must receive another person's approval;

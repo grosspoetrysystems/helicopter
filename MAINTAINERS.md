@@ -10,7 +10,7 @@ Helicopter's files express policy; GitHub settings enforce it. This guide covers
 - [ ] Review the two-PR limit and issue-first categories in `CONTRIBUTING.md`.
 - [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
 - [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
-- [ ] For a user-owned repository with one maintainer, decide whether to enable [solo-maintainer mode](docs/solo-maintainer-administration.md); disable it when another maintainer joins.
+- [ ] For a personal or organization-owned repository with one maintainer, decide whether to enable [solo-maintainer mode](docs/solo-maintainer-administration.md); disable it when another maintainer joins.
 - [ ] Publish reachable private security and conduct contacts.
 
 ## GitHub settings
