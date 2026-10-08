@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
+from configure_repository import protection
 from validate_pr import validate_body
 
 SCRIPT = ROOT / "scripts" / "validate_pr.py"
@@ -85,11 +86,13 @@ def owner_event(
     sender_type: str = "User",
     event_repository_id: int = 100,
     head_repository_id: int = 100,
+    author_association: str = "OWNER",
 ) -> dict[str, object]:
     return {
         "repository": {"id": event_repository_id},
         "sender": {"id": sender_id, "type": sender_type},
         "pull_request": {
+            "author_association": author_association,
             "body": "",
             "user": {"id": author_id, "type": author_type},
             "base": {"repo": {"id": 100, "owner": {"id": owner_id, "type": owner_type}}},
@@ -176,12 +179,9 @@ class ValidateBodyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Human review is still required", result.stdout)
 
-    def test_solo_maintainer_mode_requires_configured_user(self) -> None:
+    def test_solo_mode_requires_configured_maintainer(self) -> None:
         owner = owner_event()
-        disabled = run_cli(owner, "--solo-maintainer-id", "1")
-        self.assertEqual(disabled.returncode, 1, disabled.stdout + disabled.stderr)
-
-        enabled = ("--solo-maintainer-mode", "true", "--solo-maintainer-id", "1")
+        enabled = ("--mode", "solo", "--solo-maintainer-id", "1")
         cases = {
             "personal owner": (owner, 0),
             "organization maintainer": (
@@ -191,7 +191,7 @@ class ValidateBodyTests(unittest.TestCase):
             "wrong account": (owner_event(author_id=2), 1),
             "bot": (owner_event(author_type="Bot"), 1),
             "wrong repository": (owner_event(event_repository_id=101), 1),
-            "collaborator sender": (owner_event(sender_id=2), 1),
+            "different sender": (owner_event(sender_id=2), 1),
             "bot sender": (owner_event(sender_type="Bot"), 1),
             "fork": (owner_event(head_repository_id=101), 1),
         }
@@ -200,28 +200,70 @@ class ValidateBodyTests(unittest.TestCase):
                 result = run_cli(event, *enabled)
                 self.assertEqual(result.returncode, expected_code, result.stdout + result.stderr)
 
-        personal_non_owner = run_cli(
-            owner_event(author_id=2, sender_id=2),
-            "--solo-maintainer-mode",
-            "true",
-            "--solo-maintainer-id",
-            "2",
-        )
-        self.assertEqual(personal_non_owner.returncode, 1, personal_non_owner.stdout)
-
         for invalid_id in ("", "0", "-1", "+1", "01", " 1 ", "owner"):
             with self.subTest(invalid_id=invalid_id):
-                rejected = run_cli(
-                    owner,
-                    "--solo-maintainer-mode",
-                    "true",
-                    "--solo-maintainer-id",
-                    invalid_id,
-                )
+                rejected = run_cli(owner, "--mode", "solo", "--solo-maintainer-id", invalid_id)
                 self.assertEqual(rejected.returncode, 1, rejected.stdout + rejected.stderr)
 
-        accepted = run_cli(owner, *enabled)
-        self.assertIn("configured maintainer", accepted.stdout)
+    def test_contributor_mode_exempts_nobody(self) -> None:
+        for mode in ("contributor", "invalid"):
+            with self.subTest(mode=mode):
+                result = run_cli(owner_event(), "--mode", mode, "--solo-maintainer-id", "1")
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+
+    def test_team_mode_exempts_trusted_same_repository_authors(self) -> None:
+        for association in ("OWNER", "MEMBER", "COLLABORATOR"):
+            with self.subTest(association=association):
+                result = run_cli(
+                    owner_event(
+                        author_association=association,
+                        owner_id=200,
+                        owner_type="Organization",
+                    ),
+                    "--mode",
+                    "team",
+                )
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        refused = (
+            owner_event(author_association="NONE", owner_id=200, owner_type="Organization"),
+            owner_event(author_association="MEMBER", head_repository_id=101),
+            owner_event(author_association="MEMBER", sender_id=2),
+            owner_event(author_association="MEMBER", author_type="Bot"),
+        )
+        for event in refused:
+            result = run_cli(event, "--mode", "team")
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+
+
+class ConfigureRepositoryTests(unittest.TestCase):
+    def test_mode_protection_presets(self) -> None:
+        expected_reviews = {
+            "solo": (0, False, False, False),
+            "contributor": (1, True, True, False),
+            "team": (1, True, True, True),
+        }
+        for mode, reviews in expected_reviews.items():
+            with self.subTest(mode=mode):
+                settings = protection(mode)
+                review_settings = settings["required_pull_request_reviews"]
+                self.assertEqual(
+                    (
+                        review_settings["required_approving_review_count"],
+                        review_settings["require_code_owner_reviews"],
+                        review_settings["dismiss_stale_reviews"],
+                        review_settings["require_last_push_approval"],
+                    ),
+                    reviews,
+                )
+                self.assertEqual(
+                    settings["required_status_checks"],
+                    {"strict": True, "contexts": ["test-validator", "validate-metadata"]},
+                )
+                self.assertFalse(settings["enforce_admins"])
+                self.assertFalse(settings["allow_force_pushes"])
+                self.assertFalse(settings["allow_deletions"])
+                self.assertTrue(settings["required_conversation_resolution"])
 
 
 if __name__ == "__main__":

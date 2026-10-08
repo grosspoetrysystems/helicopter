@@ -10,23 +10,21 @@ Helicopter's files express policy; GitHub settings enforce it. This guide covers
 - [ ] Review the two-PR limit and issue-first categories in `CONTRIBUTING.md`.
 - [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
 - [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
-- [ ] For a personal or organization-owned repository with one maintainer, decide whether to enable [solo-maintainer mode](docs/solo-maintainer-administration.md); disable it when another maintainer joins.
+- [ ] Choose `solo`, `contributor`, or `team` in [maintainer operating modes](docs/maintainer-modes.md), then run the repository configurator after its acceptance and refusal checks pass.
 - [ ] Publish reachable private security and conduct contacts.
 
 ## GitHub settings
 
-Configure a ruleset for the default branch:
+Run `python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY` after the required checks have run successfully. The configurator protects the default branch and applies the selected mode.
 
-- require pull requests and at least one human approval;
-- require CODEOWNER approval for protected paths;
-- dismiss stale approvals and require approval after the latest push;
-- prevent the last pusher from supplying the final approval, where supported;
+All modes:
+
+- require `test-validator` and `validate-metadata`;
 - require resolved review conversations;
-- require `contribution-intake / validate-metadata` plus project CI;
-- bind required checks to the expected GitHub App when supported;
-- block force pushes and branch deletion;
-- restrict bypass to a small emergency group; and
-- require signed commits when practical.
+- block force pushes and branch deletion; and
+- retain administrator bypass for emergency recovery.
+
+`solo` requires zero approvals because no second reviewer exists. `contributor` and `team` require one approval and CODEOWNER review; `team` also requires approval after the latest push. See [maintainer operating modes](docs/maintainer-modes.md) for the trust and transition rules.
 
 For public repositories, set the concurrent non-draft PR limit for users without write access. Start at two unless maintainer capacity supports more; add trusted contributors to the bypass list deliberately.
 

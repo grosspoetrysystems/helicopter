@@ -47,7 +47,7 @@ class Refusal:
     message: str
 
 
-def _solo_maintainer(event: dict[str, Any], maintainer_id: int) -> bool:
+def _metadata_exempt(event: dict[str, Any], mode: str, solo_maintainer_id: int) -> bool:
     pull_request = event.get("pull_request") or {}
     author = pull_request.get("user") or {}
     base_repository = (pull_request.get("base") or {}).get("repo") or {}
@@ -55,26 +55,30 @@ def _solo_maintainer(event: dict[str, Any], maintainer_id: int) -> bool:
     repository = event.get("repository") or {}
     owner = base_repository.get("owner") or {}
     sender = event.get("sender") or {}
-    owner_id = owner.get("id")
-    owner_type = owner.get("type")
     repository_id = repository.get("id")
 
-    return (
-        type(maintainer_id) is int
-        and maintainer_id > 0
-        and type(owner_id) is int
-        and owner_id > 0
-        and owner_type in {"User", "Organization"}
-        and (owner_type == "Organization" or owner_id == maintainer_id)
-        and type(repository_id) is int
+    trusted_same_repository_author = (
+        type(repository_id) is int
         and repository_id > 0
+        and owner.get("type") in {"User", "Organization"}
         and author.get("type") == "User"
         and sender.get("type") == "User"
-        and author.get("id") == maintainer_id
-        and sender.get("id") == maintainer_id
+        and type(author.get("id")) is int
+        and author.get("id") > 0
+        and sender.get("id") == author.get("id")
         and base_repository.get("id") == repository_id
         and head_repository.get("id") == repository_id
     )
+    if not trusted_same_repository_author:
+        return False
+
+    if mode == "team":
+        return pull_request.get("author_association") in {"OWNER", "MEMBER", "COLLABORATOR"}
+
+    if mode != "solo" or author.get("id") != solo_maintainer_id:
+        return False
+
+    return owner.get("type") == "Organization" or owner.get("id") == solo_maintainer_id
 
 
 def _checked(body: str, label: str) -> bool:
@@ -222,15 +226,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("event", type=Path, help="GitHub pull request event JSON")
     parser.add_argument(
-        "--solo-maintainer-mode",
-        choices=("false", "true"),
-        default="false",
-        help="exempt only the configured sole maintainer when set to true",
+        "--mode",
+        default="contributor",
+        help="repository mode: solo, contributor, or team",
     )
     parser.add_argument(
         "--solo-maintainer-id",
         default="",
-        help="immutable numeric GitHub user ID authorized for solo-maintainer mode",
+        help="immutable numeric GitHub user ID authorized in solo mode",
     )
     args = parser.parse_args()
 
@@ -245,8 +248,9 @@ def main() -> int:
     else:
         solo_maintainer_id = 0
 
-    if args.solo_maintainer_mode == "true" and _solo_maintainer(event, solo_maintainer_id):
-        print("Solo-maintainer metadata exemption accepted for the configured maintainer.")
+    mode = args.mode if args.mode in {"solo", "contributor", "team"} else "contributor"
+    if _metadata_exempt(event, mode, solo_maintainer_id):
+        print(f"{mode.capitalize()}-mode metadata exemption accepted for the trusted maintainer.")
         return 0
 
     body = (event.get("pull_request") or {}).get("body") or ""

@@ -42,7 +42,7 @@ Adapt this repository for the following project:
 - Maintainer or team: <CODEOWNER>
 - Private security contact: <CONTACT_OR_GITHUB_PRIVATE_REPORTING>
 - Contribution agreement: <DCO_OR_CLA>
-- Maintainer mode: <SOLO_OR_MULTI>
+- Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 
 Replace Helicopter-specific names, URLs, owners, contacts, labels, and
 contribution terms. Keep the metadata intake workflow limited to protected
@@ -51,9 +51,8 @@ Add project build and test CI in a separate pull_request workflow. Extend
 CODEOWNERS for dependencies, lockfiles, release paths, security-sensitive code,
 generators, and agent instructions that exist in this project.
 
-If maintainer mode is SOLO, follow docs/solo-maintainer-administration.md, but
-leave its repository variable unset until the acceptance and refusal checks
-below pass. Leave it unset for MULTI.
+Follow docs/maintainer-modes.md for the selected mode. Do not run the
+repository configurator until the acceptance and refusal checks below pass.
 
 Run python3 tests/test_validate_pr.py and the project's checks. Report changed
 files, results, and GitHub settings that still need an administrator.
@@ -65,5 +64,4 @@ files, results, and GitHub settings that still need an administrator.
 2. Complete the repository settings in [`MAINTAINERS.md`](../MAINTAINERS.md).
 3. Create the `needs-triage` and `automation-review` labels, or update the issue forms to use existing labels.
 4. Open one valid and one deliberately invalid draft pull request.
-5. Require `contribution-intake / validate-metadata` only after the valid and invalid draft pull requests behave as expected.
-6. If SOLO was selected, enable the repository variable now.
+5. After the valid and invalid draft pull requests behave as expected, run `python3 scripts/configure_repository.py MODE`.

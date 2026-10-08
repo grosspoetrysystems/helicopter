@@ -91,7 +91,7 @@ to configure this project:
 - Maintainer or team: <CODEOWNER>
 - Private security contact: <CONTACT_OR_GITHUB_PRIVATE_REPORTING>
 - Contribution agreement: <DCO_OR_CLA>
-- Maintainer mode: <SOLO_OR_MULTI>
+- Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 ```
 
 ### Existing repository
@@ -100,12 +100,12 @@ to configure this project:
 Follow https://github.com/grosspoetrysystems/helicopter/blob/main/docs/add-to-existing-repository.md
 to install Helicopter in the current repository.
 
-Maintainer mode: <SOLO_OR_MULTI>
+Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 ```
 
-The linked guides contain the implementation rules, verification steps, and GitHub settings checklist. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
+The linked guides contain the implementation rules, verification steps, and mode configurator. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
 
-Running the project alone? [Solo-maintainer mode](docs/solo-maintainer-administration.md) exempts one configured maintainer in a personal or organization-owned repository from contribution metadata while leaving CI and repository protections in place.
+Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole maintainer, a maintainer-led contributor project, or an internal team that also accepts external contributions.
 
 ## Trust boundary
 

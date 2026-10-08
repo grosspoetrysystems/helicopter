@@ -7,10 +7,10 @@ on:
 permissions:
   contents: read
 
-# Unset repository variables disable the exemption. A positive immutable user
-# ID can authorize that sole maintainer in a user- or organization-owned repo.
+# An unset or invalid mode fails closed to contributor mode. The solo ID is
+# used only in solo mode; team mode trusts same-repository members and collaborators.
 env:
-  HELICOPTER_SOLO_MAINTAINER_MODE: ${{ vars.HELICOPTER_SOLO_MAINTAINER_MODE == 'true' && 'true' || 'false' }}
+  HELICOPTER_MODE: ${{ vars.HELICOPTER_MODE || 'contributor' }}
   HELICOPTER_SOLO_MAINTAINER_ID: ${{ vars.HELICOPTER_SOLO_MAINTAINER_ID || '0' }}
 
 concurrency:
@@ -36,7 +36,7 @@ jobs:
           EVENT_PATH: ${{ github.event_path }}
         run: >-
           python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH"
-          --solo-maintainer-mode "$HELICOPTER_SOLO_MAINTAINER_MODE"
+          --mode "$HELICOPTER_MODE"
           --solo-maintainer-id "$HELICOPTER_SOLO_MAINTAINER_ID"
 
       # Security invariant: this privileged event must never check out or execute
