@@ -1,0 +1,52 @@
+name: checks
+
+# Helicopter's own development checks (GPS-411). Not shipped to adopters.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out pull request code without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Workflow invariants
+        run: python3 scripts/dev_checks.py workflows
+
+      - name: Changelog fragment
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: python3 scripts/dev_checks.py changes "origin/$BASE_REF" HEAD
+
+      - name: actionlint
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: -color
+
+      - name: zizmor
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        with:
+          version: 1.31.1
+          advanced-security: false
+          online-audits: false
+
+      # Maintainers' titles become squash commits, so theirs must conform.
+      # Outside contributors only get an annotation; the maintainer fixes the title on merge.
+      - name: Pull request title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+        run: |
+          if python3 scripts/dev_checks.py subject "$TITLE"; then exit 0; fi
+          case "$ASSOCIATION" in
+            OWNER|MEMBER|COLLABORATOR) exit 1 ;;
+            *) echo "::notice title=Pull request title::Not in Conventional Commits form; a maintainer will adjust it when merging." ;;
+          esac
