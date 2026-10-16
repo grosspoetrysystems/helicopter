@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from configure_repository import QUEUE_LABELS as PROVISIONED
-from pr_queue import LABELS as QUEUE_LABELS, plan, turn
+from pr_queue import LABELS as QUEUE_LABELS, notice, plan, queued, turn
 
 NOW = datetime(2026, 10, 30, tzinfo=timezone.utc)
 
@@ -82,17 +82,42 @@ class TurnTests(unittest.TestCase):
 
 
 class PlanTests(unittest.TestCase):
-    def since(self, days):
-        return turn(PR, [{"event": "ready_for_review", "created_at": (NOW - timedelta(days=days)).isoformat()}], NOW)
+    def since(self, hours):
+        return turn(PR, [{"event": "ready_for_review", "created_at": (NOW - timedelta(hours=hours)).isoformat()}], NOW)
 
-    def test_thresholds(self):
-        self.assertEqual(plan(self.since(6), NOW, 7, 21), (QUEUE_LABELS["reviewer"], None))
-        self.assertEqual(plan(self.since(7), NOW, 7, 21), (QUEUE_LABELS["reviewer"], "nudge"))
-        self.assertEqual(plan(self.since(21), NOW, 7, 21), (QUEUE_LABELS["paused"], "pause"))
+    def test_thresholds_in_hours(self):
+        self.assertEqual(plan(self.since(3), NOW, 4, 72), (QUEUE_LABELS["reviewer"], None))
+        self.assertEqual(plan(self.since(4), NOW, 4, 72), (QUEUE_LABELS["reviewer"], "nudge"))
+        self.assertEqual(plan(self.since(72), NOW, 4, 72), (QUEUE_LABELS["paused"], "pause"))
+
+    def test_default_thresholds_keep_seven_and_twenty_one_days(self):
+        self.assertEqual(plan(self.since(7 * 24 - 1), NOW, 168, 504), (QUEUE_LABELS["reviewer"], None))
+        self.assertEqual(plan(self.since(7 * 24), NOW, 168, 504), (QUEUE_LABELS["reviewer"], "nudge"))
+        self.assertEqual(plan(self.since(21 * 24), NOW, 168, 504), (QUEUE_LABELS["paused"], "pause"))
 
     def test_author_turn_never_nudges_or_pauses(self):
         current = turn(PR, [review(0, "max", "changes_requested")], NOW)
-        self.assertEqual(plan(current, NOW, 7, 21), (QUEUE_LABELS["author"], None))
+        self.assertEqual(plan(current, NOW, 4, 72), (QUEUE_LABELS["author"], None))
+
+    def test_notice_reports_hours_then_days(self):
+        self.assertIn("waited 5 hours", notice("nudge", self.since(5), NOW, "alice", ["max"]))
+        self.assertIn("waited 3 days", notice("nudge", self.since(72), NOW, "alice", ["max"]))
+
+
+class QueueScopeTests(unittest.TestCase):
+    def test_team_mode_queues_members(self):
+        for association in ("OWNER", "MEMBER", "COLLABORATOR"):
+            pr = {**PR, "state": "open", "author_association": association}
+            self.assertTrue(queued(pr, team=True), association)
+            self.assertFalse(queued(pr, team=False), association)
+
+    def test_outside_contributions_are_queued_in_every_mode(self):
+        pr = {**PR, "state": "open", "author_association": "CONTRIBUTOR"}
+        self.assertTrue(queued(pr, team=False))
+        self.assertTrue(queued(pr, team=True))
+
+    def test_closed_pull_requests_are_never_queued(self):
+        self.assertFalse(queued({**PR, "state": "closed", "author_association": "MEMBER"}, team=True))
 
 
 class LabelTests(unittest.TestCase):

@@ -10,6 +10,13 @@ Helicopter separates trusted project work from external contribution intake. Cho
 
 Unset or invalid mode configuration fails closed to `contributor`.
 
+## Busy internal teams
+
+In `team` mode the queue also covers pull requests from members, because a team's pile-up is usually internal work waiting while people switch between tasks. The rules are the same in every mode: admission, the first review, and the turn clock work identically. Only the queue's scope and thresholds change.
+
+- **Thresholds in hours.** Set `HELICOPTER_QUEUE_NUDGE_HOURS` and `HELICOPTER_QUEUE_PAUSE_HOURS` to the team's pace, for example 4 and 72.
+- **Reviewer assignment stays with GitHub.** Helicopter doesn't pick reviewers. Use CODEOWNERS for who may review what, and GitHub's [team review assignment](https://docs.github.com/en/organizations/organizing-members-into-teams/managing-code-review-settings-for-your-team) (round robin or load balance) to spread requests. Nudges go to whoever GitHub requested.
+
 ## Configure or change mode
 
 Authenticate an administrator, ensure the default branch exists, and run:
