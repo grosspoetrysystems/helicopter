@@ -5,8 +5,8 @@ Helicopter separates trusted project work from external contribution intake. Cho
 | Mode | Use when | Metadata exemption | Protected-branch reviews |
 | --- | --- | --- | --- |
 | `solo` | One human owns or maintains the project | The configured immutable user ID, on a same-repository branch | Zero required approvals |
-| `contributor` | One or more maintainers primarily receive external contributions | None; every pull request follows the contribution contract | One approval and CODEOWNER review |
-| `team` | An internal organization team builds in the open and also accepts external contributions | Same-repository authors GitHub identifies as `OWNER`, `MEMBER`, or `COLLABORATOR` | One approval, CODEOWNER review, and approval after the latest push |
+| `contributor` | One or more maintainers primarily receive external contributions | None; every pull request follows the contribution contract | One CODEOWNER approval, given after the latest push |
+| `team` | An internal organization team builds in the open and also accepts external contributions | Same-repository authors GitHub identifies as `OWNER`, `MEMBER`, or `COLLABORATOR` | One CODEOWNER approval after the latest push; administrators included |
 
 Unset or invalid mode configuration fails closed to `contributor`.
 
@@ -19,7 +19,7 @@ gh auth status
 python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY
 ```
 
-Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
+Add `--dry-run` to print every change without making it. Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
 
 1. protects the default branch;
 2. requires up-to-date `test-validator` and `validate-metadata` checks;
@@ -27,11 +27,30 @@ Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
 4. requires resolved conversations;
 5. applies the review policy for the selected mode;
 6. sets the repository-scoped `HELICOPTER_MODE` variable;
-7. sets `HELICOPTER_SOLO_MAINTAINER_ID` to the authenticated user's immutable ID only in `solo` mode, and deletes it in other modes.
+7. sets `HELICOPTER_SOLO_MAINTAINER_ID` to the authenticated user's immutable ID only in `solo` mode, and deletes it in other modes;
+8. creates the `queue:` labels;
+9. applies the repository baseline below, and protects release tags.
 
 Run the configurator again to change modes. Do not set Helicopter mode variables at organization scope: GitHub merges organization variables into the same `vars` context, which could affect every inheriting repository.
 
 Required checks must have run successfully before making them required. During first installation, open valid and invalid draft pull requests before running the configurator.
+
+## Repository baseline
+
+Sound defaults for any repository, with or without agents. The configurator applies them in every mode; anything the plan doesn't allow (secret scanning on some private repositories, for example) is printed as a manual step instead of failing the run.
+
+| Setting | Why |
+| --- | --- |
+| Approval after the latest push (`contributor`, `team`) | Whoever pushed last can't also approve. An agent or coworker pushing after a human approval needs a fresh review. |
+| Administrators follow review rules (`team` only) | Several maintainers share the repository; `solo` and `contributor` keep admin merge for a lone maintainer's own work. |
+| Workflow token read-only by default; workflows can't approve pull requests | A compromised or confused workflow can't write, and automation can never supply the required approval. |
+| Approval for workflow runs from first-time contributors | A new account's pull request can't spend CI until a maintainer looks. |
+| Dependabot alerts and security updates, secret scanning, push protection, private vulnerability reporting | Known-vulnerable dependencies and committed secrets surface early; reports arrive privately. |
+| `v*` tags can't move or be deleted | Each release's manifest stays tied to the exact files it describes. |
+| `.github/dependabot.yml` | Keeps pinned action SHAs current, grouped into one weekly pull request. New versions wait 7 days (GitHub's default is 3); security updates are never delayed. Dependabot can't update `docker://` images, so bump the PR-Agent image by hand. |
+| CODEOWNERS on `.github/`, `scripts/`, `tests/`, `.pr_agent.toml`, `AGENTS.md`, and policy files | Changes to automation and policy always reach a maintainer. |
+
+**Authorized automation.** Bots listed in `HELICOPTER_AUTOMATION_LOGINS` pass admission on branches of this repository without the pull request template; human review still applies. The configurator sets it to `dependabot[bot]` when it's unset; if you already set it, add `dependabot[bot]` yourself.
 
 ## Trust decisions
 

@@ -81,6 +81,22 @@ def _metadata_exempt(event: dict[str, Any], mode: str, solo_maintainer_id: int) 
     return owner.get("type") == "Organization" or owner.get("id") == solo_maintainer_id
 
 
+def _authorized_automation(event: dict[str, Any], logins: frozenset[str]) -> bool:
+    """A maintainer-listed bot (HELICOPTER_AUTOMATION_LOGINS) on a branch of this repository."""
+    pull_request = event.get("pull_request") or {}
+    author = pull_request.get("user") or {}
+    sender = event.get("sender") or {}
+    repository_id = (event.get("repository") or {}).get("id")
+    return (
+        author.get("type") == "Bot"
+        and author.get("login") in logins
+        and sender.get("login") == author.get("login")
+        and type(repository_id) is int
+        and ((pull_request.get("base") or {}).get("repo") or {}).get("id") == repository_id
+        and ((pull_request.get("head") or {}).get("repo") or {}).get("id") == repository_id
+    )
+
+
 def _checked(body: str, label: str) -> bool:
     return re.search(rf"^- \[[xX]\] {re.escape(label)}\s*$", body, re.MULTILINE) is not None
 
@@ -235,6 +251,11 @@ def main() -> int:
         default="",
         help="immutable numeric GitHub user ID authorized in solo mode",
     )
+    parser.add_argument(
+        "--automation-logins",
+        default="",
+        help="maintainer-authorized bot logins (HELICOPTER_AUTOMATION_LOGINS), comma or space separated",
+    )
     args = parser.parse_args()
 
     try:
@@ -251,6 +272,10 @@ def main() -> int:
     mode = args.mode if args.mode in {"solo", "contributor", "team"} else "contributor"
     if _metadata_exempt(event, mode, solo_maintainer_id):
         print(f"{mode.capitalize()}-mode metadata exemption accepted for the trusted maintainer.")
+        return 0
+
+    if _authorized_automation(event, frozenset(filter(None, re.split(r"[\s,]+", args.automation_logins)))):
+        print("Authorized automation exemption accepted. Human review is still required.")
         return 0
 
     body = (event.get("pull_request") or {}).get("body") or ""
