@@ -32,14 +32,15 @@ and merge into existing files instead of creating duplicate policies.
 Adapt the imported files to this repository's maintainers, contribution
 agreement, private security route, labels, required checks, dependencies,
 lockfiles, release paths, security-sensitive code, generators, and agent
-instructions. Keep privileged intake metadata-only. Run untrusted builds in a
-separate pull_request workflow without secrets.
+instructions. Never check out or execute pull-request code in the privileged
+intake and queue workflows. Run untrusted builds in a separate pull_request
+workflow without secrets.
 
 Import `scripts/configure_repository.py` and follow docs/maintainer-modes.md
 for the selected mode. Do not run the configurator until the acceptance and
 refusal checks below pass.
 
-Run python3 tests/test_validate_pr.py and the repository's existing checks.
+Run python3 -m unittest discover -s tests and the repository's existing checks.
 Show the diff, results, assumptions, and GitHub settings an administrator must
 finish. Do not commit or push.
 ```

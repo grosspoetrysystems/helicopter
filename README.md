@@ -25,22 +25,25 @@ Projects need better intake without building an agent platform or turning every 
 
 ## What Helicopter does
 
-Helicopter adds a small policy layer to the normal GitHub pull request flow:
+Helicopter adds a small policy layer to the normal GitHub pull request flow. Each pull request climbs a ramp: a cheaper step must pass before a more expensive one runs, and every step that stops it says why.
 
 1. The contributor names an accountable human and declares how the work was produced.
 2. Agent-authored work includes identity, run, base commit, and capability metadata.
-3. A metadata-only workflow runs the validator from the protected default branch.
-4. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
-5. Maintainers get one actionable refusal path when required context is missing.
+3. A metadata-only check runs the validator from the protected default branch, at no cost.
+4. Optionally, an admitted pull request gets a [PR-Agent](https://github.com/the-pr-agent/pr-agent) review on cheap inference with your own key (a fraction of a cent): what works, what to fix, effort, tests, and security.
+5. The queue labels whose turn it is, nudges the owner after 7 days, and pauses publicly after 21 instead of going silent.
+6. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
 
 ```mermaid
 flowchart LR
     A["Human, AI-assisted,<br/>or agent-authored change"] --> B["Pull request contract"]
-    B --> C{"Trusted-base<br/>metadata check"}
+    B --> C{"Trusted-base<br/>metadata check ($0)"}
     C -->|"Missing context"| D["Actionable refusal"]
     D --> B
-    C -->|"Admitted"| E["Independent project CI"]
-    E --> F["CODEOWNERS + human review"]
+    C -->|"Admitted"| R["Optional PR-Agent review<br/>(your key, &lt;1¢)"]
+    R -.->|"Advisory fixes"| B
+    R --> Q["Queue: owner, clock,<br/>nudge, honest pause"]
+    Q --> F["CODEOWNERS + human review"]
     F --> G{"Protected ruleset"}
     G -->|"Approved"| H["Human merge"]
 ```
@@ -60,12 +63,15 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 
 - `CONTRIBUTING.md`: Helicopter's contribution contract for humans and agents.
 - `.github/pull_request_template.md`: accountable owner, verification, risk, and agent provenance.
-- `.github/workflows/contribution-intake.yml`: trusted-base metadata admission.
+- `.github/workflows/contribution-intake.yml`: trusted-base admission, the optional first review, and queue state.
+- `.github/workflows/contribution-queue.yml`: keeps queue state current between pull request events.
+- `.pr_agent.toml`: the first review's model and its input and output rules.
 - `scripts/validate_pr.py`: dependency-free validation with actionable refusal codes.
+- `scripts/pr_queue.py`: dependency-free queue.
 - `.github/CODEOWNERS` and `MAINTAINERS.md`: ownership and repository settings.
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, and focused issue forms.
 
-Add an agent framework, AI reviewer, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
+Add an agent framework, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
 
 ## Install with an agent
 
@@ -109,7 +115,7 @@ Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole m
 
 ## Trust boundary
 
-`contribution-intake.yml` uses `pull_request_target` only to read event metadata. It checks out the pull request's base SHA, never the contributor head, grants only `contents: read`, persists no credentials, and executes no contributor code. A head checkout, build, test, or PR-controlled action does not belong in that workflow.
+No privileged Helicopter job checks out, builds, or executes the contributor head. `contribution-intake.yml` uses `pull_request_target` so its workflow, scripts, and review rules load from the protected default branch and its jobs can comment on fork pull requests. Admission reads metadata with `contents: read`. The first review runs PR-Agent pinned by image digest; it holds the optional model key and a write token so it can post its review, and reads the pull request only through the API. The queue job holds `issues`/`pull-requests: write` and `checks: read` and no secret. A head checkout, build, test, or PR-controlled action does not belong in that workflow.
 
 Project tests belong in a separate `pull_request` workflow on an ephemeral hosted runner with no secrets and minimum token permissions.
 
@@ -122,7 +128,7 @@ Helicopter cannot prove that:
 - the base SHA was protected when the run started;
 - the contribution is correct, safe, licensed, useful, or in scope;
 - a bot identity is authorized; or
-- maintainers have capacity to review the work.
+- maintainers have capacity to review the work. The queue makes missing capacity visible; it cannot create it.
 
 Rulesets, CODEOWNERS, independent CI, dependency and security checks, and human review remain the enforcement boundary.
 

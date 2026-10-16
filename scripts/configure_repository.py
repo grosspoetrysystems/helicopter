@@ -8,6 +8,11 @@ from typing import Any
 
 MODES = ("solo", "contributor", "team")
 REQUIRED_CHECKS = ("test-validator", "validate-metadata")
+QUEUE_LABELS = {
+    "queue:awaiting-reviewer": ("fbca04", "Waiting on a maintainer; the queue clock is running."),
+    "queue:awaiting-author": ("c5def5", "Waiting on the contributor."),
+    "queue:no-capacity": ("d4c5f9", "Paused: no maintainer capacity yet. Stays open and keeps its place."),
+}
 
 
 def protection(mode: str) -> dict[str, Any]:
@@ -103,6 +108,8 @@ def configure(repository: str, mode: str) -> None:
         )
 
     set_variable(repository, "HELICOPTER_MODE", mode)
+    for name, (color, description) in QUEUE_LABELS.items():
+        gh("label", "create", name, "--color", color, "--description", description, "--force", "--repo", repository)
     print(f"Configured {repository} for Helicopter {mode} mode on {default_branch}.")
 
 
