@@ -103,7 +103,7 @@ gh api repos/OWNER/REPOSITORY/rules/branches/BRANCH
 
 ## Trusted intake
 
-The metadata workflow uses `pull_request_target` and loads its validator from `github.event.repository.default_branch`. It never checks out or executes pull-request code. The mode variable is read at run time, but workflow changes must reach the protected default branch before the new behavior exists.
+The intake workflow uses `pull_request_target` and loads its validator, review rules (`.pr_agent.toml`), and queue script from `github.event.repository.default_branch`. No job checks out or executes pull-request code; per-job permissions and the one optional secret are listed in [Protect the policy plane](../MAINTAINERS.md#protect-the-policy-plane). The mode variable is read at run time, but workflow changes must reach the protected default branch before the new behavior exists.
 
 The exemption returns success before parsing the pull-request body. It does not auto-check attestations or invent provenance. Project builds and tests remain in an unprivileged `pull_request` workflow.
 

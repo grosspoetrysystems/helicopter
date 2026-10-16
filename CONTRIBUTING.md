@@ -66,6 +66,8 @@ Each pull request must:
 
 Use a draft pull request while work is incomplete. Maintainers may ask you to split unrelated, generated, mechanical, or otherwise unreviewable changes. Passing CI does not guarantee acceptance.
 
+When you have addressed review, push your changes and reply, or press **Re-request review**. Either one hands the pull request back to a maintainer. Labels show whose turn it is: `queue:awaiting-author` is yours, `queue:awaiting-reviewer` is ours. An automated review may comment on your change first.
+
 Contributors without write access may have at most **two non-draft pull requests** open at once unless a maintainer grants an exception.
 
 ## Review

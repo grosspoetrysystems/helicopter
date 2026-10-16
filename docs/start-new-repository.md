@@ -45,8 +45,8 @@ Adapt this repository for the following project:
 - Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 
 Replace Helicopter-specific names, URLs, owners, contacts, labels, and
-contribution terms. Keep the metadata intake workflow limited to protected
-default-branch metadata; never check out or execute pull-request code in `pull_request_target`.
+contribution terms. Never check out or execute pull-request code in the
+privileged intake and queue workflows.
 Add project build and test CI in a separate pull_request workflow. Extend
 CODEOWNERS for dependencies, lockfiles, release paths, security-sensitive code,
 generators, and agent instructions that exist in this project.
@@ -54,7 +54,7 @@ generators, and agent instructions that exist in this project.
 Follow docs/maintainer-modes.md for the selected mode. Do not run the
 repository configurator until the acceptance and refusal checks below pass.
 
-Run python3 tests/test_validate_pr.py and the project's checks. Report changed
+Run python3 -m unittest discover -s tests and the project's checks. Report changed
 files, results, and GitHub settings that still need an administrator.
 ```
 
