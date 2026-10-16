@@ -54,7 +54,7 @@ Put builds and tests in a separate `pull_request` workflow on ephemeral GitHub-h
 
 ## Intake order
 
-1. Check template, accountable human, origin, bot authorization, issue requirement, and PR budget.
+1. Check the template (Change, Verification, Risk), DCO sign-off, bot authorization, issue requirement, and PR budget.
 2. Reject duplicates, out-of-scope work, and unreviewable size before expensive CI.
 3. Route protected paths, dependencies, generated artifacts, and security-sensitive changes to owners.
 4. Run independent tests and security checks without repository secrets.

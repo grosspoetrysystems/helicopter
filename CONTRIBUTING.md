@@ -2,9 +2,9 @@
 
 Helicopter welcomes human-authored, AI-assisted, and agent-authored work when it is useful, reviewable, and owned by an accountable person.
 
-## Human accountability
+## Your agreement
 
-Every pull request needs an accountable human contributor. By submitting one, you confirm that you:
+You agree once, not on every pull request. Signing off your commits (see [Legal](#legal)) means you:
 
 - reviewed the complete diff;
 - understand and can explain the change;
@@ -16,16 +16,9 @@ AI assistance does not transfer those responsibilities to a model, provider, age
 
 ## AI and agent use
 
-Trivial autocomplete and private explanatory use need no disclosure. Disclose AI assistance when it materially shaped the implementation, tests, issue, or pull request.
+You don't need to declare how a change was produced. Reviewers judge the change, its verification, and its risk, the same way for everyone.
 
-Choose exactly one origin in the pull request template:
-
-- **Human-authored:** AI was not materially involved.
-- **AI-assisted:** a human directed the work and materially authored, checked, and revised the result.
-- **Agent-authored:** an agent performed substantial repository work; an accountable human still reviewed and owns the result.
-- **Authorized automation:** a maintainer-approved bot or GitHub App acted within its registered purpose and permissions.
-
-Agent-authored and authorized-automation pull requests must include the agent identity, immutable run ID, base commit SHA, capabilities, network mode, verification, and a sanitized provenance or run-log reference when available. Do not publish raw transcripts that may contain secrets, personal data, or restricted source material.
+A project adopting Helicopter can require disclosure by setting the repository variable `HELICOPTER_REQUIRE_DISCLOSURE` to `true` and adding a `## Disclosure` section to its pull request template. That section then must link a verifiable record, such as an [Agent Trace](https://agent-trace.dev/) file, or describe material AI or agent involvement, or say `None`. Never publish raw transcripts that may contain secrets, personal data, or restricted source material.
 
 An agent must not:
 
@@ -55,14 +48,13 @@ Unapproved bots and autonomous agents must not open issues, pull requests, revie
 
 ## Pull request contract
 
-Each pull request must:
+The pull request template has three required sections:
 
-- solve one coherent problem;
-- explain motivation and user-visible behavior;
-- link an accepted issue when required;
-- report commands and results, or explain why verification is not applicable;
-- declare dependency, security, and workflow impact; and
-- disclose material AI or agent involvement.
+- **Change:** the problem, the smallest solution, and its user-visible effect; link an accepted issue when required.
+- **Verification:** the commands or steps you ran and what they showed, or why verification doesn't apply.
+- **Risk:** check every area the change touches (dependencies, security, workflows, generated content), or `None of the above`.
+
+Each pull request should solve one coherent problem. If a section is missing or empty, the admission check names it and says how to fix it.
 
 Use a draft pull request while work is incomplete. Maintainers may ask you to split unrelated, generated, mechanical, or otherwise unreviewable changes. Passing CI does not guarantee acceptance.
 
@@ -84,7 +76,9 @@ Helicopter uses [Developer Certificate of Origin 1.1](https://developercertifica
 Signed-off-by: Your Name <your.email@example.com>
 ```
 
-The accountable human or authorized organization, not an AI system, makes that certification. A project adopting Helicopter with a CLA or another contribution agreement must replace this section and configure the corresponding check.
+A person or authorized organization, not an AI system, makes that certification. A project adopting Helicopter can use a contributor license agreement (CLA) instead: replace this section with the CLA's terms and configure the CLA check in place of the DCO check.
+
+Maintainers also sign their commits (`git commit -S`); outside contributors don't have to.
 
 ## Security and conduct
 
