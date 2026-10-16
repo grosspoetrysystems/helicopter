@@ -3,8 +3,8 @@
 # change these rules from a pull request.
 
 [config]
-model = "openrouter/deepseek/deepseek-v4-flash"
-fallback_models = ["openrouter/deepseek/deepseek-v4-flash"]
+model = "openrouter/deepseek/deepseek-v4.1-flash"
+fallback_models = ["openrouter/deepseek/deepseek-v4.1-flash"]
 custom_model_max_tokens = 32000 # cost rail: larger pull requests are clipped to fit
 publish_output_progress = false # one comment, no "preparing review" placeholder
 

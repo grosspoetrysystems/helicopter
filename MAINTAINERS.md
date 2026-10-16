@@ -75,7 +75,7 @@ Each pull request earns the next, more expensive step by passing the cheaper one
 
 Admission's refusal and PR-Agent's review are the only automated responses on a pull request; the queue adds a notice only when a maintainer is late.
 
-**First review.** Runs only when the `HELICOPTER_REVIEW_KEY` secret exists, never on drafts, on opening and on every push, editing its one comment in place. `.pr_agent.toml` on the default branch holds the model (default `openrouter/deepseek/deepseek-v4-flash`), the cost rail (`custom_model_max_tokens`: larger pull requests are clipped to fit), the output sections, and the input rules in `extra_instructions`. Change the review by editing that file. Set a credit limit on the key with your provider. The review is advisory: it does not move the turn or block merging.
+**First review.** Runs only when the `HELICOPTER_REVIEW_KEY` secret exists, never on drafts, on opening and on every push, editing its one comment in place. `.pr_agent.toml` on the default branch holds the model (default `openrouter/deepseek/deepseek-v4.1-flash`), the cost rail (`custom_model_max_tokens`: larger pull requests are clipped to fit), the output sections, and the input rules in `extra_instructions`. Change the review by editing that file. Set a credit limit on the key with your provider. The review is advisory: it does not move the turn or block merging.
 
 **Queue.** Every run recomputes state from the pull request timeline; labels are outputs. The clock runs only while it is a maintainer's turn and restarts whenever the turn passes to a maintainer. It is the contributor's turn after refused admission or a maintainer's **Request changes**, until the contributor pushes or replies. Any maintainer comment or review restarts the clock.
 
