@@ -1,0 +1,3 @@
+kind: Added
+body: 'The review ramp: a first review by PR-Agent on DeepSeek V4.1 Flash (only when the HELICOPTER_REVIEW_KEY secret exists) and a whose-turn queue with nudges and pauses.'
+time: 2026-10-16T19:45:43.730401+02:00

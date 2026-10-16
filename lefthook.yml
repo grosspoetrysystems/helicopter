@@ -1,0 +1,21 @@
+# Helicopter's own development hooks. Not shipped to adopters.
+# Install once: `lefthook install`. Needs actionlint, zizmor, and changie on PATH.
+
+commit-msg:
+  commands:
+    subject:
+      run: python3 scripts/dev_checks.py subject --file {1}
+
+pre-push:
+  parallel: true
+  commands:
+    tests:
+      run: python3 -m unittest discover -s tests
+    actionlint:
+      run: actionlint
+    zizmor:
+      run: zizmor --min-severity medium .github/workflows
+    workflow-invariants:
+      run: python3 scripts/dev_checks.py workflows
+    changelog-fragment:
+      run: python3 scripts/dev_checks.py changes origin/main HEAD

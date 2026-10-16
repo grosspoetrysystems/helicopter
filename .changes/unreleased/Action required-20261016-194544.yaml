@@ -1,0 +1,5 @@
+kind: Action required
+body: The queue needs its labels.
+time: 2026-10-16T19:45:44.790394+02:00
+custom:
+    Action: 'Run scripts/configure_repository.py again to create the queue: labels.'

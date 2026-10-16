@@ -4,7 +4,9 @@ name: contribution-queue
 # reviews on fork pull requests (whose own events get a read-only token), and
 # the passage of time for nudges and pauses.
 on:
-  issue_comment:
+  # Privileged by design: labels and comments need a write token. Only trusted
+  # default-branch code runs; scripts/dev_checks.py enforces that.
+  issue_comment: # zizmor: ignore[dangerous-triggers]
     types: [created]
   schedule:
     - cron: "17 */6 * * *"
