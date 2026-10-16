@@ -34,10 +34,12 @@ jobs:
       - name: Validate pull request metadata
         env:
           EVENT_PATH: ${{ github.event_path }}
+          HELICOPTER_AUTOMATION_LOGINS: ${{ vars.HELICOPTER_AUTOMATION_LOGINS }}
         run: >-
           python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH"
           --mode "$HELICOPTER_MODE"
           --solo-maintainer-id "$HELICOPTER_SOLO_MAINTAINER_ID"
+          --automation-logins "$HELICOPTER_AUTOMATION_LOGINS"
 
       # Security invariant: no job in this privileged workflow checks out or
       # executes the pull request head. Project builds/tests belong in a separate
