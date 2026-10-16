@@ -79,11 +79,11 @@ Admission's refusal and PR-Agent's review are the only automated responses on a 
 
 **Queue.** Every run recomputes state from the pull request timeline; labels are outputs. The clock runs only while it is a maintainer's turn and restarts whenever the turn passes to a maintainer. It is the contributor's turn after refused admission or a maintainer's **Request changes**, until the contributor pushes or replies. Any maintainer comment or review restarts the clock.
 
-- After `HELICOPTER_QUEUE_NUDGE_DAYS` (default 7), one comment mentions the requested reviewers.
-- After `HELICOPTER_QUEUE_PAUSE_DAYS` (default 21), the pull request is labelled `queue:no-capacity` and the contributor is told publicly. It stays open.
-- Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) and drafts are not queued.
+- After `HELICOPTER_QUEUE_NUDGE_HOURS` (default 168, seven days), one comment mentions the requested reviewers.
+- After `HELICOPTER_QUEUE_PAUSE_HOURS` (default 504, 21 days), the pull request is labelled `queue:no-capacity` and the contributor is told publicly. It stays open.
+- Drafts are not queued. Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) are queued only in `team` mode; see [Busy internal teams](docs/maintainer-modes.md#busy-internal-teams).
 
-`contribution-queue.yml` reconciles every six hours and on pull request comments. Maintainer reviews on fork pull requests are picked up by the next sweep.
+`contribution-queue.yml` reconciles every hour and on pull request comments, so hour thresholds mean something. Maintainer reviews on fork pull requests are picked up by the next sweep. On a private repository each sweep uses a few Actions minutes; lower the cron frequency if day thresholds are enough.
 
 **Hoppers.** The first review's labels sort waiting work; no extra tooling is involved. Replace `OWNER` with the account or organization:
 
