@@ -17,18 +17,9 @@ SCRIPT = ROOT / "scripts" / "validate_pr.py"
 TEMPLATE = ROOT / ".github" / "pull_request_template.md"
 
 
-VALID_HUMAN = """## Change
+VALID = """## Change
 
 Small fix.
-
-## Human accountability
-
-Accountable contributor: @alice
-
-- [x] I reviewed the complete diff.
-- [x] I understand and can explain the change.
-- [x] I verified the evidence below.
-- [x] I have the right to submit this contribution.
 
 ## Verification
 
@@ -37,30 +28,6 @@ Ran the check.
 ## Risk
 
 - [x] None of the above
-
-## AI / automation
-
-- [x] Human-authored
-- [ ] AI-assisted
-- [ ] Agent-authored
-- [ ] Authorized automation
-
-Agent identity: `none`
-Run ID: `none`
-Base SHA: `none`
-
-Capabilities:
-
-```json
-{
-  "repository_write": false,
-  "command_execution": false,
-  "network": "none",
-  "secrets": "none",
-  "approve": false,
-  "merge": false
-}
-```
 """
 
 
@@ -101,83 +68,61 @@ def owner_event(
     }
 
 
-def codes(body: str) -> set[str]:
-    return {refusal.code for refusal in validate_body(body)}
+def codes(body: str, require_disclosure: bool = False) -> set[str]:
+    return {refusal.code for refusal in validate_body(body, require_disclosure)}
 
 
 class ValidateBodyTests(unittest.TestCase):
-    def test_valid_human_submission_passes(self) -> None:
-        self.assertEqual(codes(VALID_HUMAN), set())
+    def test_minimal_submission_passes(self) -> None:
+        self.assertEqual(codes(VALID), set())
 
-    def test_accountability_must_be_real_and_confirmed(self) -> None:
-        body = VALID_HUMAN.replace("@alice", "@YOUR_GITHUB_USERNAME").replace(
-            "[x] I reviewed the complete diff.", "[ ] I reviewed the complete diff."
-        )
+    def test_each_missing_section_is_named(self) -> None:
+        for section in ("Change", "Verification", "Risk"):
+            with self.subTest(section=section):
+                body = VALID.replace(f"## {section}", "## Other")
+                refusals = validate_body(body)
+                self.assertIn("REFUSE_TEMPLATE_INCOMPLETE", {r.code for r in refusals})
+                self.assertIn(f"## {section}", " ".join(r.message for r in refusals))
+
+    def test_unfilled_template_is_refused_with_specific_fixes(self) -> None:
         self.assertEqual(
-            codes(body),
-            {"REFUSE_HUMAN_ACCOUNTABILITY_MISSING", "REFUSE_ACCOUNTABILITY_UNCONFIRMED"},
+            codes(TEMPLATE.read_text(encoding="utf-8")),
+            {"REFUSE_CHANGE_EMPTY", "REFUSE_VERIFICATION_EMPTY", "REFUSE_RISK_UNCHECKED"},
         )
 
-    def test_exactly_one_origin_is_required(self) -> None:
-        body = VALID_HUMAN.replace("[ ] AI-assisted", "[x] AI-assisted")
-        self.assertIn("REFUSE_AGENT_ORIGIN_AMBIGUOUS", codes(body))
-
-    def test_agent_submission_requires_identity_and_provenance(self) -> None:
-        body = VALID_HUMAN.replace("[x] Human-authored", "[ ] Human-authored").replace(
-            "[ ] Agent-authored", "[x] Agent-authored"
-        )
-        self.assertEqual(
-            codes(body),
-            {"REFUSE_AGENT_IDENTITY_UNKNOWN", "REFUSE_PROVENANCE_INCOMPLETE"},
-        )
-
-    def test_valid_agent_submission_passes(self) -> None:
-        body = (
-            VALID_HUMAN.replace("[x] Human-authored", "[ ] Human-authored")
-            .replace("[ ] Agent-authored", "[x] Agent-authored")
-            .replace("Agent identity: `none`", "Agent identity: `builder[bot]`")
-            .replace("Run ID: `none`", "Run ID: `run-123`")
-            .replace("Base SHA: `none`", "Base SHA: `" + "a" * 40 + "`")
-        )
-        self.assertEqual(codes(body), set())
-
-    def test_agent_cannot_claim_secrets_or_merge(self) -> None:
-        body = (
-            VALID_HUMAN.replace("[x] Human-authored", "[ ] Human-authored")
-            .replace("[ ] Agent-authored", "[x] Agent-authored")
-            .replace("Agent identity: `none`", "Agent identity: `builder[bot]`")
-            .replace("Run ID: `none`", "Run ID: `run-123`")
-            .replace("Base SHA: `none`", "Base SHA: `" + "a" * 40 + "`")
-            .replace('"secrets": "none"', '"secrets": "repository"')
-            .replace('"merge": false', '"merge": true')
-        )
-        self.assertEqual(codes(body), {"REFUSE_SECRET_ACCESS", "REFUSE_AGENT_SELF_APPROVAL"})
-
-    def test_agent_capabilities_must_match_template(self) -> None:
-        body = (
-            VALID_HUMAN.replace("[x] Human-authored", "[ ] Human-authored")
-            .replace("[ ] Agent-authored", "[x] Agent-authored")
-            .replace("Agent identity: `none`", "Agent identity: `builder[bot]`")
-            .replace("Run ID: `none`", "Run ID: `run-123`")
-            .replace("Base SHA: `none`", "Base SHA: `" + "a" * 40 + "`")
-            .replace('"network": "none"', '"network": true')
-        )
-        self.assertIn("REFUSE_CAPABILITIES_INVALID", codes(body))
-
-    def test_shipped_template_matches_validator_contract(self) -> None:
+    def test_filled_template_passes(self) -> None:
         body = (
             TEMPLATE.read_text(encoding="utf-8")
-            .replace("@YOUR_GITHUB_USERNAME", "@alice")
-            .replace("- [ ] I ", "- [x] I ")
-            .replace("- [ ] Human-authored", "- [x] Human-authored")
+            .replace("Closes #", "Fixes the queue label.\n\nCloses #12")
+            .replace("<commands and concise result; project CI verifies independently>", "unittest: 40 passed")
+            .replace("- [ ] None of the above", "- [x] None of the above")
         )
         self.assertEqual(codes(body), set())
 
+    def test_removed_ceremony_is_not_required(self) -> None:
+        for field in ("Accountable contributor", "I reviewed the complete diff", "Human-authored", "Capabilities", "Run ID"):
+            with self.subTest(field=field):
+                self.assertNotIn(field, TEMPLATE.read_text(encoding="utf-8"))
+        self.assertEqual(codes(VALID), set())
+
+    def test_disclosure_is_required_only_when_opted_in(self) -> None:
+        self.assertEqual(codes(VALID, require_disclosure=False), set())
+        self.assertEqual(codes(VALID, require_disclosure=True), {"REFUSE_DISCLOSURE_MISSING"})
+        empty = VALID + "\n## Disclosure\n\n<!-- link a record -->\n"
+        self.assertEqual(codes(empty, require_disclosure=True), {"REFUSE_DISCLOSURE_MISSING"})
+        filled = VALID + "\n## Disclosure\n\nAgent Trace: .agent-trace/run.json\n"
+        self.assertEqual(codes(filled, require_disclosure=True), set())
+
     def test_cli_accepts_a_valid_event(self) -> None:
-        result = run_cli({"pull_request": {"body": VALID_HUMAN}})
+        result = run_cli({"pull_request": {"body": VALID}})
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Human review is still required", result.stdout)
+
+    def test_cli_disclosure_flag(self) -> None:
+        refused = run_cli({"pull_request": {"body": VALID}}, "--require-disclosure", "true")
+        self.assertEqual(refused.returncode, 1, refused.stdout)
+        self.assertIn("REFUSE_DISCLOSURE_MISSING", refused.stdout)
 
     def test_solo_mode_requires_configured_maintainer(self) -> None:
         owner = owner_event()
