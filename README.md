@@ -9,7 +9,7 @@ Governance and intake for open source projects working with human, AI-assisted, 
 
 AI can produce patches faster than maintainers can review them. More output does not mean more correct, useful, or trustworthy work. A generated change can pass syntax checks while missing the product intent, weakening a security boundary, or shifting review cost onto volunteers.
 
-Helicopter gives maintainers a clear view of ownership, provenance, risk, and queue pressure before they spend time on a patch. It keeps one person accountable for every contribution, rejects incomplete submissions early, and leaves merge authority with humans.
+Helicopter gives maintainers a clear view of what a change does, how it was verified, what it risks, and queue pressure before they spend time on a patch. It keeps one person accountable for every contribution through a one-time sign-off, rejects incomplete submissions early, and leaves merge authority with humans.
 
 ## The problem
 
@@ -27,12 +27,11 @@ Projects need better intake without building an agent platform or turning every 
 
 Helicopter adds a small policy layer to the normal GitHub pull request flow. Each pull request climbs a ramp: a cheaper step must pass before a more expensive one runs, and every step that stops it says why.
 
-1. The contributor names an accountable human and declares how the work was produced.
-2. Agent-authored work includes identity, run, base commit, and capability metadata.
-3. A metadata-only check runs the validator from the protected default branch, at no cost.
-4. Optionally, an admitted pull request gets a [PR-Agent](https://github.com/the-pr-agent/pr-agent) review on cheap inference with your own key (a fraction of a cent): what works, what to fix, effort, tests, and security.
-5. The queue labels whose turn it is, nudges the owner after 7 days, and pauses publicly after 21 instead of going silent.
-6. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
+1. The contributor describes the change, how it was verified, and what it risks. Accountability is a one-time agreement: the DCO sign-off on commits.
+2. A metadata-only check runs the validator from the protected default branch, at no cost.
+3. Optionally, an admitted pull request gets a [PR-Agent](https://github.com/the-pr-agent/pr-agent) review on cheap inference with your own key (a fraction of a cent): what works, what to fix, effort, tests, and security.
+4. The queue labels whose turn it is, nudges the owner after 7 days, and pauses publicly after 21 instead of going silent.
+5. CODEOWNERS, project CI, rulesets, and human review handle the actual change.
 
 ```mermaid
 flowchart LR
@@ -48,13 +47,13 @@ flowchart LR
     G -->|"Approved"| H["Human merge"]
 ```
 
-The validator checks whether declarations are present and internally consistent. It does not decide whether a patch is correct or whether a claim is true.
+The validator checks that the required sections are filled in. It does not decide whether a patch is correct or whether a claim is true.
 
 ## Who it considers
 
 - **Maintainers:** bounded queues, early refusals, protected policy files, and less review spent on incomplete work.
 - **Contributors:** one visible contract, specific repair instructions, and the same behavioral standard regardless of tool choice.
-- **Security owners:** no untrusted code in privileged intake, minimum token permissions, immutable action pins, and explicit capability disclosure.
+- **Security owners:** no untrusted code in privileged intake, minimum token permissions, immutable action pins, and optional verifiable disclosure.
 - **Small projects:** plain Markdown, GitHub-native controls, a dependency-free validator, and no service to operate.
 
 Helicopter moderates behavior and evidence. It does not ask maintainers to guess whether prose “looks AI-generated.”
@@ -62,7 +61,7 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 ## What is included
 
 - `CONTRIBUTING.md`: Helicopter's contribution contract for humans and agents.
-- `.github/pull_request_template.md`: accountable owner, verification, risk, and agent provenance.
+- `.github/pull_request_template.md`: change, verification, and risk.
 - `.github/workflows/contribution-intake.yml`: trusted-base admission, the optional first review, and queue state.
 - `.github/workflows/contribution-queue.yml`: keeps queue state current between pull request events.
 - `.pr_agent.toml`: the first review's model and its input and output rules.
@@ -123,9 +122,7 @@ Project tests belong in a separate `pull_request` workflow on an ephemeral hoste
 
 Helicopter cannot prove that:
 
-- the named person reviewed or understands the patch;
-- an agent's capability or provenance claims are truthful;
-- the base SHA was protected when the run started;
+- the person who signed off reviewed or understands the patch;
 - the contribution is correct, safe, licensed, useful, or in scope;
 - a bot identity is authorized; or
 - maintainers have capacity to review the work. The queue makes missing capacity visible; it cannot create it.
