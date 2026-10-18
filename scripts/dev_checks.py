@@ -99,7 +99,7 @@ def main() -> int:
 
     if args.command == "changes":
         # Only added fragments count, but any change to shipped files counts.
-        changed = git("diff", "--name-only", f"{args.base}...{args.head}").split()
+        changed = git("diff", "--name-only", f"{args.base}...{args.head}").splitlines()
         if missing_fragment(changed):
             print(
                 "Shipped files changed without a changelog fragment. Add one with `changie new` "
