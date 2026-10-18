@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Configure Helicopter's repository mode and default-branch protection."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import subprocess

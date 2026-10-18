@@ -1,0 +1,30 @@
+changesDir: .changes
+unreleasedDir: unreleased
+headerPath: header.tpl.md
+changelogPath: CHANGELOG.md
+versionExt: md
+versionFormat: '## {{.Version}} - {{.Time.Format "2006-01-02"}}'
+kindFormat: '### {{.Kind}}'
+changeFormat: '* {{.Body}}'
+kinds:
+  - label: Added
+    auto: minor
+  - label: Changed
+    auto: minor
+  - label: Removed
+    auto: minor
+  - label: Fixed
+    auto: patch
+  - label: Security
+    auto: patch
+  - label: Action required
+    auto: minor
+    changeFormat: '* {{.Body}} (**Action:** {{.Custom.Action}})'
+    additionalChoices:
+      - key: Action
+        label: Action
+        type: string
+        minLength: 1
+newlines:
+  afterChangelogHeader: 1
+  beforeChangelogVersion: 1

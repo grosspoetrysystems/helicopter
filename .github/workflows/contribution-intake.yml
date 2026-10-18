@@ -1,7 +1,9 @@
 name: contribution-intake
 
 on:
-  pull_request_target:
+  # Privileged by design: needs a write token and the review key. It never checks
+  # out or runs pull request code; scripts/dev_checks.py enforces that.
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     types: [opened, edited, synchronize, reopened, ready_for_review, converted_to_draft]
 
 permissions:
