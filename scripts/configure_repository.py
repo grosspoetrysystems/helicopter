@@ -20,12 +20,12 @@ QUEUE_LABELS = {
 }
 
 
-def protection(mode: str) -> dict[str, Any]:
+def protection(mode: str, extra_checks: tuple[str, ...] = ()) -> dict[str, Any]:
     reviews = mode != "solo"
     return {
         "required_status_checks": {
             "strict": True,
-            "contexts": list(REQUIRED_CHECKS),
+            "contexts": [*REQUIRED_CHECKS, *extra_checks],
         },
         # Team mode has several maintainers, so administrators follow the same review rule.
         # Solo and contributor modes may have one maintainer, who needs admin merge for their own work.
@@ -99,7 +99,7 @@ def api(method: str, endpoint: str, payload: dict[str, Any] | None, dry_run: boo
     gh("api", "--method", method, endpoint, *(["--input", "-"] if payload else []), input_text=json.dumps(payload) if payload else None)
 
 
-def configure(repository: str, mode: str, dry_run: bool = False) -> None:
+def configure(repository: str, mode: str, dry_run: bool = False, extra_checks: tuple[str, ...] = ()) -> None:
     def run(*arguments: str) -> None:
         if dry_run:
             print("gh " + " ".join(arguments))
@@ -119,7 +119,7 @@ def configure(repository: str, mode: str, dry_run: bool = False) -> None:
         run("variable", "set", "HELICOPTER_MODE", "--body", "contributor", "--repo", repository)
 
     default_branch = gh("repo", "view", repository, "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
-    api("PUT", f"repos/{repository}/branches/{default_branch}/protection", protection(mode), dry_run)
+    api("PUT", f"repos/{repository}/branches/{default_branch}/protection", protection(mode, extra_checks), dry_run)
 
     if mode == "solo":
         run("variable", "set", "HELICOPTER_SOLO_MAINTAINER_ID", "--body", gh("api", "user", "--jq", ".id"), "--repo", repository)
@@ -159,12 +159,18 @@ def main() -> int:
     parser.add_argument("mode", choices=MODES)
     parser.add_argument("--repo", help="OWNER/REPOSITORY; defaults to the current repository")
     parser.add_argument("--dry-run", action="store_true", help="print every change instead of making it")
+    parser.add_argument(
+        "--extra-check",
+        action="append",
+        default=[],
+        help="another required status check, repeatable; only checks your pull request workflows always report",
+    )
     args = parser.parse_args()
 
     repository = args.repo or gh(
         "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"
     )
-    configure(repository, args.mode, args.dry_run)
+    configure(repository, args.mode, args.dry_run, tuple(args.extra_check))
     return 0
 
 

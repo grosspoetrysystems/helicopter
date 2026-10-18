@@ -220,6 +220,10 @@ class ConfigureRepositoryTests(unittest.TestCase):
             {"approval_policy": "first_time_contributors"},
         )
 
+    def test_extra_checks_are_required_alongside_the_defaults(self) -> None:
+        contexts = protection("solo", ("checks",))["required_status_checks"]["contexts"]
+        self.assertEqual(contexts, ["test-validator", "validate-metadata", "checks"])
+
     def test_release_tags_cannot_move_or_be_deleted(self) -> None:
         ruleset = tag_ruleset()
         self.assertEqual((ruleset["target"], ruleset["enforcement"]), ("tag", "active"))
