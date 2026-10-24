@@ -46,7 +46,9 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           gh api --paginate --slurp "repos/$REPOSITORY/pulls/$PR_NUMBER/commits?per_page=100" > "$RUNNER_TEMP/commits.json"
-          gh api -X GET search/issues -f q="repo:$REPOSITORY is:pr is:open draft:false author:$AUTHOR" --jq .total_count > "$RUNNER_TEMP/open_prs"
+          # The live list, not search: search lags and can miss a just-opened pull request.
+          gh api --paginate "repos/$REPOSITORY/pulls?state=open&per_page=100" \
+            --jq ".[] | select(.user.login == \"$AUTHOR\" and (.draft | not)) | .number" | wc -l > "$RUNNER_TEMP/open_prs"
 
       - name: Validate pull request metadata
         env:

@@ -28,6 +28,8 @@ No check enforces these; maintainers may still ask you to follow them.
 - Solve one coherent problem per pull request. Maintainers may ask you to split unrelated, generated, mechanical, or otherwise unreviewable changes.
 - Read the whole diff and be ready to explain and revise it, whoever or whatever wrote it.
 - Don't publish raw transcripts that may contain secrets, personal data, or restricted source material.
+- Don't post substantive answers as though they were the accountable person's judgment when a tool wrote them.
+- Maintainers moderate observable behavior and policy violations, not guesses that writing "looks AI-generated."
 - Operators of autonomous agents request authorization with the **Automation authorization** issue form before their agent opens issues, reviews, or comments; only pull requests from unlisted bots are refused automatically.
 
 Passing every check does not guarantee acceptance.

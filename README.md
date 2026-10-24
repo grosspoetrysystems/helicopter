@@ -131,7 +131,7 @@ Rulesets, CODEOWNERS, independent CI, dependency and security checks, and human 
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Sign off your commits; the pull request needs only Change, Verification, and Risk.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Sign off every commit; the pull request description needs Change, Verification, and Risk.
 
 ## Security
 
