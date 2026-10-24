@@ -33,7 +33,9 @@ NOT_SHIPPED = (
     "lefthook.yml",
     ".changie.yaml",
     "scripts/dev_checks.py",
+    "scripts/release_manifest.py",
     ".github/workflows/checks.yml",
+    ".github/workflows/release.yml",
 )
 FRAGMENTS = ".changes/unreleased/"
 
