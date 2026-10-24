@@ -10,9 +10,7 @@ What we expect of every contributor, however the change was produced: you've rea
 
 ## AI and agent use
 
-You don't need to declare how a change was produced.
-
-A project adopting Helicopter can require disclosure by setting the repository variable `HELICOPTER_REQUIRE_DISCLOSURE` to `true` and adding a `## Disclosure` section to its pull request template. That section then must link a verifiable record, such as an [Agent Trace](https://agent-trace.dev/) file, or describe material AI or agent involvement, or say `None`. Never publish raw transcripts that may contain secrets, personal data, or restricted source material.
+You don't need to declare how a change was produced. If a tool helped, the commit trailer it adds is welcome, for example the Linux kernel's `Assisted-by: AGENT_NAME:MODEL_VERSION`. An AI tool never adds `Signed-off-by`; only a person certifies the DCO. Never publish raw transcripts that may contain secrets, personal data, or restricted source material.
 
 An agent must not:
 

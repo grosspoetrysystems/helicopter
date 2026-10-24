@@ -87,7 +87,7 @@ def _section(body: str, name: str) -> str | None:
     return "\n".join(line for line in lines if line and line not in PLACEHOLDERS and not line.startswith("```"))
 
 
-def validate_body(body: str, require_disclosure: bool = False) -> list[Refusal]:
+def validate_body(body: str) -> list[Refusal]:
     refusals: list[Refusal] = []
     sections = {name: _section(body, name) for name in REQUIRED_SECTIONS}
 
@@ -119,15 +119,6 @@ def validate_body(body: str, require_disclosure: bool = False) -> list[Refusal]:
             )
         )
 
-    if require_disclosure and not _section(body, "Disclosure"):
-        refusals.append(
-            Refusal(
-                "REFUSE_DISCLOSURE_MISSING",
-                "This project requires a ## Disclosure section: link a verifiable record (for example an "
-                "Agent Trace file) or describe material AI or agent involvement. Write `None` if there was none.",
-            )
-        )
-
     return refusals
 
 
@@ -138,11 +129,6 @@ def main() -> int:
         "--mode",
         default="contributor",
         help="repository mode: solo, contributor, or team",
-    )
-    parser.add_argument(
-        "--require-disclosure",
-        default="false",
-        help="`true` to require a ## Disclosure section (HELICOPTER_REQUIRE_DISCLOSURE)",
     )
     parser.add_argument(
         "--solo-maintainer-id",
@@ -177,7 +163,7 @@ def main() -> int:
         return 0
 
     body = (event.get("pull_request") or {}).get("body") or ""
-    refusals = validate_body(body, args.require_disclosure.strip().lower() == "true")
+    refusals = validate_body(body)
     if refusals:
         print("Contribution intake refused:")
         for refusal in refusals:

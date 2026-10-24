@@ -53,7 +53,7 @@ The validator checks that the required sections are filled in. It does not decid
 
 - **Maintainers:** bounded queues, early refusals, protected policy files, and less review spent on incomplete work.
 - **Contributors:** one visible contract, specific repair instructions, and the same behavioral standard regardless of tool choice.
-- **Security owners:** no untrusted code in privileged intake, minimum token permissions, immutable action pins, and optional verifiable disclosure.
+- **Security owners:** no untrusted code in privileged intake, minimum token permissions, and immutable action pins.
 - **Small projects:** plain Markdown, GitHub-native controls, a dependency-free validator, and no service to operate.
 
 Helicopter moderates behavior and evidence. It does not ask maintainers to guess whether prose “looks AI-generated.”
