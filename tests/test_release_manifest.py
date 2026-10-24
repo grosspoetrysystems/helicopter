@@ -25,7 +25,9 @@ class ManifestTests(unittest.TestCase):
     def test_development_files_are_not_shipped(self):
         files = ["scripts/pr_queue.py", "scripts/dev_checks.py", "scripts/release_manifest.py", "AGENTS.md",
                  ".changes/v0.1.0.md", "tests/test_ramp.py", ".github/workflows/release.yml", ".github/workflows/contribution-queue.yml"]
-        self.assertEqual(shipped(files), [".github/workflows/contribution-queue.yml", "scripts/pr_queue.py"])
+        files += ["tests/test_validate_pr.py", "tests/test_dev_checks.py"]
+        # Adopters' required check test-validator runs the shipped tests.
+        self.assertEqual(shipped(files), [".github/workflows/contribution-queue.yml", "scripts/pr_queue.py", "tests/test_ramp.py", "tests/test_validate_pr.py"])
 
 
 if __name__ == "__main__":
