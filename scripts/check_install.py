@@ -29,17 +29,24 @@ PR_HEAD = re.compile(r"head\.sha|head\.ref|head_ref|refs/pull/|merge_commit_sha"
 CHECKOUT = re.compile(r"uses:\s*actions/checkout@")
 TRUSTED_REF = "ref: ${{ github.event.repository.default_branch }}"
 
-# Helicopter's own development tooling: adopters don't get these, and the install removes them.
+# Helicopter's own files: its development tooling, README, and install guides. Releases leave them out,
+# so the install never copies them; an adopter's copy shouldn't have them.
 NOT_SHIPPED = (
     ".changes/",
     "AGENTS.md",
     "CHANGELOG.md",
+    "README.md",
+    "assets/helicopter-header.webp",
+    "docs/start-new-repository.md",
+    "docs/add-to-existing-repository.md",
     "lefthook.yml",
     ".changie.yaml",
     "scripts/dev_checks.py",
     "scripts/release_manifest.py",
+    "skills/install-helicopter/",
     "tests/test_dev_checks.py",
     "tests/test_release_manifest.py",
+    "tests/test_stage.py",
     ".github/workflows/checks.yml",
     ".github/workflows/release.yml",
 )
@@ -50,11 +57,18 @@ DEV_MARKERS = {
     ".changes/": "HELICOPTER_",
     "AGENTS.md": "# Working on Helicopter",
     "CHANGELOG.md": "HELICOPTER_",
+    "README.md": "helicopter-header.webp",
+    "docs/start-new-repository.md": HELICOPTER,
+    "docs/add-to-existing-repository.md": HELICOPTER,
     "lefthook.yml": "dev_checks.py",
     ".changie.yaml": "Action required",
     ".github/workflows/checks.yml": "dev_checks.py",
     ".github/workflows/release.yml": "release_manifest.py",
 }
+
+# Written by the install: the release it came from, and Helicopter's license for the copied files.
+VERSION_MARKER = ".github/helicopter/version.json"
+INSTALL_PATHS = {"LICENSE": ".github/helicopter/LICENSE"}
 
 Fetch = Callable[[str], "tuple[int, Any]"]
 
@@ -220,7 +234,7 @@ def settings_findings(repository: str, fetch: Fetch) -> list[Finding]:
 
 
 def file_findings(root: Path, repository: str) -> list[Finding]:
-    """Check the checkout: safe workflows, the adopter's own names, no Helicopter development tooling."""
+    """Check the checkout: safe workflows, the adopter's own names, no Helicopter-only files, the version marker."""
     findings: list[Finding] = []
     workflows = root / ".github/workflows"
     texts = {f.name: f.read_text() for f in sorted(workflows.glob("*.y*ml"))}
@@ -234,8 +248,11 @@ def file_findings(root: Path, repository: str) -> list[Finding]:
     if repository.lower() == HELICOPTER:
         return findings
 
-    leftovers = [name for name, marker in ((".github/CODEOWNERS", "Helicopter currently has one maintainer"), ("SECURITY.md", HELICOPTER))
-                 if marker in ((root / name).read_text() if (root / name).is_file() else "")]
+    leftovers = [name for name, marker in (
+        (".github/CODEOWNERS", "Helicopter currently has one maintainer"),
+        ("SECURITY.md", HELICOPTER),
+        (".github/ISSUE_TEMPLATE/config.yml", HELICOPTER),
+    ) if marker in ((root / name).read_text() if (root / name).is_file() else "")]
     findings.append(Finding("FAIL", "your own owners and contacts", f"replace Helicopter's in {', '.join(leftovers)}")
                     if leftovers else Finding("PASS", "your own owners and contacts"))
 
@@ -245,9 +262,18 @@ def file_findings(root: Path, repository: str) -> list[Finding]:
         marker = DEV_MARKERS.get(path)
         return bool(files) and (marker is None or any(marker in f.read_text(errors="ignore") for f in files))
 
-    tooling = [path for path in NOT_SHIPPED if helicopters(path)]
-    findings.append(Finding("FAIL", "no Helicopter development tooling", f"delete {', '.join(tooling)}")
-                    if tooling else Finding("PASS", "no Helicopter development tooling"))
+    own = [path for path in NOT_SHIPPED if helicopters(path)]
+    findings.append(Finding("FAIL", "no Helicopter-only files", f"delete {', '.join(own)}")
+                    if own else Finding("PASS", "no Helicopter-only files"))
+
+    try:
+        version = json.loads((root / VERSION_MARKER).read_text())["version"]
+        findings.append(Finding("PASS", f"Helicopter version marker ({version})"))
+    except (OSError, ValueError, KeyError, TypeError):
+        findings.append(Finding("FAIL", "Helicopter version marker",
+                                f"no valid {VERSION_MARKER}; install or update with the install-helicopter skill so updates know their base"))
+    if not (root / INSTALL_PATHS["LICENSE"]).is_file():
+        findings.append(Finding("FAIL", "Helicopter license notice", f"copy Helicopter's MIT LICENSE to {INSTALL_PATHS['LICENSE']}"))
     return findings
 
 
