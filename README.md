@@ -70,48 +70,31 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 - `scripts/configure_repository.py` and `scripts/check_install.py`: apply the repository settings for a mode, and check them without changing anything.
 - `.github/CODEOWNERS` and `MAINTAINERS.md`: ownership and repository settings.
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, and focused issue forms.
+- `docs/`: modes, the review queue, and the install checker, as an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) bundle an agent can browse from `docs/index.md`.
+- `skills/install-helicopter/`: the install skill. It stays in Helicopter; installs record their release in `.github/helicopter/version.json`.
 
 Add an agent framework, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
 
 ## Install with an agent
 
-You need [Git](https://git-scm.com/downloads), Python 3.10 or newer, the [GitHub CLI](https://github.com/cli/cli#installation), and access to the target GitHub account:
+You need [Git](https://git-scm.com/downloads), Python 3.9 or newer, the [GitHub CLI](https://github.com/cli/cli#installation), and access to the target GitHub account:
 
 ```sh
 gh auth login --web
 gh auth status
 ```
 
-Copy the prompt for the path you need.
-
-### New repository
+Install Helicopter's [`install-helicopter` skill](skills/install-helicopter/SKILL.md) with your agent's skill installer, or point the agent at it. Then ask, in a new or existing repository:
 
 ```text
-Follow https://github.com/grosspoetrysystems/helicopter/blob/main/docs/start-new-repository.md
-to configure this project:
-
-- Name: <PROJECT_NAME>
-- Purpose: <ONE_SENTENCE_PURPOSE>
-- Language/runtime: <STACK>
-- GitHub owner: <OWNER>
-- Maintainer or team: <CODEOWNER>
-- Private security contact: <CONTACT_OR_GITHUB_PRIVATE_REPORTING>
-- Contribution agreement: <DCO_OR_CLA>
-- Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
-```
-
-### Existing repository
-
-```text
-Follow https://github.com/grosspoetrysystems/helicopter/blob/main/docs/add-to-existing-repository.md
-to install Helicopter in the current repository.
-
+Install Helicopter in this repository with the install-helicopter skill
+(https://github.com/grosspoetrysystems/helicopter/tree/main/skills/install-helicopter).
 Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 ```
 
-The linked guides contain the implementation rules, verification steps, and mode configurator. Repository rulesets, required checks, private vulnerability reporting, interaction limits, and some security features require administrator access.
+The skill installs the latest release, never `main`. It checks every file against the release manifest, never overwrites your files, merges where your files differ, and opens a pull request. Afterwards `python3 scripts/check_install.py` proves the setup; [Install checker results](docs/install-checker.md) explains each line. Repository settings, rulesets, and some security features need an administrator, and only change when you say so.
 
-Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole maintainer, a maintainer-led contributor project, or an internal team that also accepts external contributions.
+Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole maintainer, a maintainer-led contributor project, or an internal team that also accepts external contributions. To turn on the optional first review, bring your own model key: add a `HELICOPTER_REVIEW_KEY` secret, an OpenRouter key with a credit limit (see [Review ramp](MAINTAINERS.md#review-ramp)).
 
 ## Trust boundary
 
