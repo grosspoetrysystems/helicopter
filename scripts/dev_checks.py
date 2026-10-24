@@ -24,17 +24,22 @@ CHECKOUT = re.compile(r"uses:\s*actions/checkout@")
 TRUSTED_REF = "ref: ${{ github.event.repository.default_branch }}"
 SUBJECT = re.compile(r"^(feat|fix|docs|refactor|test|ci|chore|perf|build|revert)(\([a-z0-9-]+\))?!?: \S.*$")
 
-# Changes to these paths don't reach adopters, so they don't need a changelog fragment.
+# Helicopter's own development tooling: adopters don't get these, and the install removes them.
 NOT_SHIPPED = (
     ".changes/",
-    "tests/",
     "AGENTS.md",
     "CHANGELOG.md",
     "lefthook.yml",
     ".changie.yaml",
     "scripts/dev_checks.py",
+    "scripts/release_manifest.py",
+    "tests/test_dev_checks.py",
+    "tests/test_release_manifest.py",
     ".github/workflows/checks.yml",
+    ".github/workflows/release.yml",
 )
+# Changes that need no changelog fragment: development tooling, plus tests (shipped, but not adopter-visible).
+NO_NOTE_NEEDED = NOT_SHIPPED + ("tests/",)
 FRAGMENTS = ".changes/unreleased/"
 
 
@@ -70,7 +75,7 @@ def workflow_problems(name: str, text: str) -> list[str]:
 
 def missing_fragment(changed: list[str]) -> bool:
     """True when shipped files changed but no changelog fragment was added."""
-    shipped = [path for path in changed if not path.startswith(NOT_SHIPPED)]
+    shipped = [path for path in changed if not path.startswith(NO_NOTE_NEEDED)]
     fragments = [path for path in changed if path.startswith(FRAGMENTS) and path.endswith(".yaml")]
     return bool(shipped) and not fragments
 
