@@ -26,7 +26,7 @@ gh auth status
 python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY
 ```
 
-Add `--dry-run` to print every change without making it. Add `--extra-check NAME` (repeatable) to require another status check, but only one your `pull_request` workflows report on every pull request; a required check that never reports blocks every merge. Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
+Add `--dry-run` to print every change without making it. Checks the branch already requires are kept. Add `--extra-check NAME` (repeatable) to require another status check, but only one your `pull_request` workflows report on every pull request; a required check that never reports blocks every merge. If you renamed Helicopter's `test-validator` or `validate-metadata` jobs, don't run the configurator as is: it would require the original names, which never report. Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
 
 1. protects the default branch;
 2. requires up-to-date `test-validator` and `validate-metadata` checks;
@@ -38,7 +38,7 @@ Add `--dry-run` to print every change without making it. Add `--extra-check NAME
 8. creates the `queue:` labels;
 9. applies the repository baseline below, and protects release tags.
 
-Run the configurator again to change modes. Do not set Helicopter mode variables at organization scope: GitHub merges organization variables into the same `vars` context, which could affect every inheriting repository.
+Run the configurator again to change modes, then `python3 scripts/check_install.py` from the repository's checkout to confirm every setting. Do not set Helicopter mode variables at organization scope: GitHub merges organization variables into the same `vars` context, which could affect every inheriting repository.
 
 Required checks must have run successfully before making them required. During first installation, open valid and invalid draft pull requests before running the configurator.
 
@@ -106,21 +106,10 @@ All modes:
 
 `solo` deliberately requires no approval because no second reviewer exists. `contributor` requires one approval but does not require approval after the latest push, allowing a maintainer to complete review after contributor updates. `team` requires approval after the latest push so one coworker cannot both supply the final update and final approval.
 
-Inspect the effective classic branch protection:
+Check the effective settings, including branch protection, against the mode:
 
 ```sh
-gh api repos/OWNER/REPOSITORY/branches/BRANCH/protection \
-  --jq '{
-    strict: .required_status_checks.strict,
-    checks: .required_status_checks.contexts,
-    admin_enforced: .enforce_admins.enabled,
-    approvals: .required_pull_request_reviews.required_approving_review_count,
-    codeowners: .required_pull_request_reviews.require_code_owner_reviews,
-    last_push: .required_pull_request_reviews.require_last_push_approval,
-    conversations: .required_conversation_resolution.enabled,
-    force_pushes: .allow_force_pushes.enabled,
-    deletions: .allow_deletions.enabled
-  }'
+python3 scripts/check_install.py --repo OWNER/REPOSITORY
 ```
 
 Repository rulesets and organization rulesets may add stricter controls:

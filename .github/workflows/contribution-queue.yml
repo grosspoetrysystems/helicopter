@@ -5,7 +5,7 @@ name: contribution-queue
 # the passage of time for nudges and pauses.
 on:
   # Privileged by design: labels and comments need a write token. Only trusted
-  # default-branch code runs; scripts/dev_checks.py enforces that.
+  # default-branch code runs; scripts/check_install.py checks that.
   issue_comment: # zizmor: ignore[dangerous-triggers]
     types: [created]
   schedule:
