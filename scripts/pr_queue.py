@@ -282,9 +282,13 @@ def check_superseded(github: GitHub, pr: dict[str, Any], events: list[dict[str, 
     return rival
 
 
-def queued(pr: dict[str, Any], team: bool) -> bool:
-    """Open pull requests from outside contributors are queued; in team mode, members' too."""
-    return pr["state"] == "open" and (team or pr["author_association"] not in MAINTAINER)
+def queued(pr: dict[str, Any], team: bool, automation: frozenset[str] = frozenset()) -> bool:
+    """Open pull requests from outside contributors are queued; in team mode, everyone's.
+
+    Authorized bots (HELICOPTER_AUTOMATION_LOGINS) count as the maintainer's own delegated work.
+    """
+    outside = pr["author_association"] not in MAINTAINER and pr["user"]["login"] not in automation
+    return pr["state"] == "open" and (team or outside)
 
 
 def require_labels(github: GitHub, wanted: set[str]) -> None:
@@ -310,15 +314,20 @@ def main() -> int:
     team = os.environ.get("HELICOPTER_MODE") == "team"
     ignored = frozenset(filter(None, re.split(r"[\s,]+", os.environ.get("HELICOPTER_AUTOMATION_LOGINS", ""))))
     now = datetime.now(timezone.utc)
-    require_labels(github, set(LABELS.values()) | {SUPERSEDED})
 
     # ponytail: about 3 calls per open PR per sweep (check runs, timeline, one per linked issue until flagged), so the
     # hourly sweep fits ~300 open PRs in GITHUB_TOKEN's 1,000 requests/hour. Beyond that, lower the cron or batch via GraphQL.
     pulls = [github.request("GET", f"pulls/{args.pr}")] if args.pr else github.request("GET", "pulls?state=open&per_page=100")
+    work = []
     for pr in pulls:
-        if not queued(pr, team):
-            print(f"#{pr['number']}: skipped ({pr['state'] if pr['state'] != 'open' else 'maintainer-authored'})")
-            continue
+        if queued(pr, team, ignored):
+            work.append(pr)
+        else:
+            print(f"#{pr['number']}: skipped ({pr['state'] if pr['state'] != 'open' else 'maintainer or authorized automation'})")
+    if work:
+        # Only when something needs a label: an idle repository without the labels stays green.
+        require_labels(github, set(LABELS.values()) | {SUPERSEDED})
+    for pr in work:
         reconcile(github, pr, now, nudge_hours, pause_hours, ignored)
     return 0
 
