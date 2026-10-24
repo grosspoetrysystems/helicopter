@@ -13,10 +13,11 @@ Helicopter's files express policy; GitHub settings enforce it. This guide covers
 - [ ] Optionally add a `HELICOPTER_REVIEW_KEY` secret (an OpenRouter key with a credit limit) to turn on the first review (see [Review ramp](#review-ramp)). An organization secret shared with selected repositories gives one key and one limit across projects.
 - [ ] Choose `solo`, `contributor`, or `team` in [maintainer operating modes](docs/maintainer-modes.md), then run the repository configurator after its acceptance and refusal checks pass.
 - [ ] Publish reachable private security and conduct contacts.
+- [ ] Run `python3 scripts/check_install.py` from the repository's checkout. Every line should read `PASS`; each failure names its fix. Run it again whenever you suspect settings drifted.
 
 ## GitHub settings
 
-Run `python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY` after the required checks have run successfully. The configurator protects the default branch, applies the selected mode, and creates the `queue:` labels. The queue fails rather than create a missing label.
+Run `python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY` after the required checks have run successfully. The configurator protects the default branch, applies the selected mode, and creates the `queue:` labels. The queue fails rather than create a missing label. `python3 scripts/check_install.py` compares the live settings with the same definitions and changes nothing.
 
 All modes:
 

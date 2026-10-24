@@ -67,6 +67,7 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 - `.pr_agent.toml`: the first review's model and its input and output rules.
 - `scripts/validate_pr.py`: dependency-free validation with actionable refusal codes.
 - `scripts/pr_queue.py`: dependency-free queue.
+- `scripts/configure_repository.py` and `scripts/check_install.py`: apply the repository settings for a mode, and check them without changing anything.
 - `.github/CODEOWNERS` and `MAINTAINERS.md`: ownership and repository settings.
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, and focused issue forms.
 

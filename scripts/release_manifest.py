@@ -18,7 +18,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from dev_checks import NOT_SHIPPED
+from check_install import NOT_SHIPPED
 
 
 def git(*args: str) -> str:
