@@ -27,6 +27,10 @@ LABELS = {
     "paused": "queue:no-capacity",
 }
 NOTICE_MARKER = "<!-- helicopter:queue {kind} since={since} -->"
+SUPERSEDED = "queue:possibly-superseded"
+SUPERSEDED_MARKER = "<!-- helicopter:superseded by=#{rival} -->"
+# GitHub's linking keywords; a bare "#1" in prose is too noisy to count.
+REFERENCE = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*:?\s+#(\d+)\b", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -124,6 +128,45 @@ def notice(kind: str, current: Turn, now: datetime, author: str, owners: list[st
     )
 
 
+def linked_issues(pr: dict[str, Any], events: list[dict[str, Any]]) -> tuple[set[int], set[int]]:
+    """Return (issues known from cross-references, `Fixes #N`-style references that may be issues)."""
+    known = {
+        source["number"]
+        for event in events
+        if event.get("event") == "cross-referenced"
+        and (source := (event.get("source") or {}).get("issue") or {})
+        and "pull_request" not in source
+    }
+    mentioned = {int(n) for n in REFERENCE.findall(f"{pr.get('title') or ''}\n{pr.get('body') or ''}")}
+    return known, mentioned - known - {pr["number"]}
+
+
+def merged_rival(pr: dict[str, Any], issue_events: dict[int, list[dict[str, Any]]]) -> tuple[int, int, datetime] | None:
+    """The first other pull request for the same issue that merged after this one opened, as (rival, issue, merged_at).
+
+    On oh-my-pi this flagged 16 of 51 superseded closures and 0 of 60 merged pull requests (GPS-419).
+    """
+    opened = _time(pr["created_at"])
+    found = []
+    for issue, events in issue_events.items():
+        for event in events:
+            source = (event.get("source") or {}).get("issue") or {}
+            merged = (source.get("pull_request") or {}).get("merged_at")
+            if event.get("event") == "cross-referenced" and merged and source["number"] != pr["number"] and _time(merged) >= opened:
+                found.append((_time(merged), source["number"], issue))
+    if not found:
+        return None
+    merged_at, rival, issue = min(found)
+    return rival, issue, merged_at
+
+
+def superseded_notice(rival: int, issue: int, merged_at: datetime) -> str:
+    return (
+        f"{SUPERSEDED_MARKER.format(rival=rival)}\n#{rival}, which also addresses #{issue}, merged on {merged_at:%Y-%m-%d}. "
+        "If this pull request still adds something, say what; otherwise a maintainer may close it."
+    )
+
+
 class GitHub:
     def __init__(self, repository: str, token: str, dry_run: bool = False) -> None:
         self.repository, self.token, self.dry_run = repository, token, dry_run
@@ -198,8 +241,43 @@ def reconcile(github: GitHub, pr: dict[str, Any], now: datetime, nudge_hours: in
             } - set(owners))
             github.request("POST", f"issues/{number}/comments", {"body": notice(due, current, now, pr["user"]["login"], owners)})
 
+    rival = check_superseded(github, pr, events) if current else None
+
     state = f"{current.whose} since {current.since:%Y-%m-%d} ({current.reason})" if current else "not queued (draft)"
-    print(f"#{number}: {want or 'no label'}; {state}{'; ' + due if due else ''}")
+    print(f"#{number}: {want or 'no label'}; {state}{'; ' + due if due else ''}{f'; possibly superseded by #{rival}' if rival else ''}")
+
+
+def is_issue(github: GitHub, number: int) -> bool:
+    """`#N` in prose may be an issue, a pull request, or nothing at all."""
+    try:
+        return "pull_request" not in (github.request("GET", f"issues/{number}") or {"pull_request": None})
+    except urllib.error.HTTPError as error:
+        if error.code in (404, 410):  # no such issue, or deleted
+            return False
+        raise
+
+
+def check_superseded(github: GitHub, pr: dict[str, Any], events: list[dict[str, Any]]) -> int | None:
+    """Label and comment once when another pull request for the same issue merged while this one waited.
+
+    Never closes and never changes whose turn it is: the label gives the maintainer one hopper to batch-close from.
+    """
+    number = pr["number"]
+    known, mentioned = linked_issues(pr, events)
+    issues = known | {n for n in mentioned if is_issue(github, n)}
+    found = merged_rival(pr, {n: github.request("GET", f"issues/{n}/timeline?per_page=100") for n in sorted(issues)})
+    if not found:
+        return None
+    rival, issue, merged_at = found
+    if SUPERSEDED not in {label["name"] for label in pr["labels"]}:
+        github.request("POST", f"issues/{number}/labels", {"labels": [SUPERSEDED]})
+    marker = SUPERSEDED_MARKER.format(rival=rival)
+    if not any(
+        (event.get("actor") or event.get("user") or {}).get("login") == BOT and (event.get("body") or "").startswith(marker)
+        for event in events
+    ):
+        github.request("POST", f"issues/{number}/comments", {"body": superseded_notice(rival, issue, merged_at)})
+    return rival
 
 
 def queued(pr: dict[str, Any], team: bool) -> bool:
@@ -230,9 +308,9 @@ def main() -> int:
     team = os.environ.get("HELICOPTER_MODE") == "team"
     ignored = frozenset(filter(None, re.split(r"[\s,]+", os.environ.get("HELICOPTER_AUTOMATION_LOGINS", ""))))
     now = datetime.now(timezone.utc)
-    require_labels(github, set(LABELS.values()))
+    require_labels(github, set(LABELS.values()) | {SUPERSEDED})
 
-    # ponytail: one timeline call per open PR; fine to ~1,000 open PRs per sweep
+    # ponytail: one timeline call per open PR, plus one per linked issue; fine to a few hundred open PRs per sweep
     # (GITHUB_TOKEN allows 1,000 requests/hour). Batch through GraphQL beyond that.
     pulls = [github.request("GET", f"pulls/{args.pr}")] if args.pr else github.request("GET", "pulls?state=open&per_page=100")
     for pr in pulls:

@@ -17,6 +17,7 @@ QUEUE_LABELS = {
     "queue:awaiting-reviewer": ("fbca04", "Waiting on a maintainer; the queue clock is running."),
     "queue:awaiting-author": ("c5def5", "Waiting on the contributor."),
     "queue:no-capacity": ("d4c5f9", "Paused: no maintainer capacity yet. Stays open and keeps its place."),
+    "queue:possibly-superseded": ("e4e669", "Another pull request for the same issue merged while this one waited."),
 }
 
 

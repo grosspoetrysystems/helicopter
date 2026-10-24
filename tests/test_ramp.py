@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from configure_repository import QUEUE_LABELS as PROVISIONED
-from pr_queue import LABELS as QUEUE_LABELS, notice, plan, queued, turn
+from pr_queue import LABELS as QUEUE_LABELS, SUPERSEDED, linked_issues, merged_rival, notice, plan, queued, turn
 
 NOW = datetime(2026, 10, 30, tzinfo=timezone.utc)
 
@@ -120,9 +120,36 @@ class QueueScopeTests(unittest.TestCase):
         self.assertFalse(queued({**PR, "state": "closed", "author_association": "MEMBER"}, team=True))
 
 
+def cross_reference(number, merged_day=None, is_pr=True):
+    source = {"number": number}
+    if is_pr:
+        source["pull_request"] = {"merged_at": at(merged_day) if merged_day is not None else None}
+    return {"event": "cross-referenced", "source": {"issue": source}}
+
+
+class SupersededTests(unittest.TestCase):
+    pr = {**PR, "number": 50, "title": "fix: thing", "body": "Closes #7. Fixes #12. Step #1 of the plan, see #3."}
+
+    def test_linked_issues_from_cross_references_and_linking_keywords(self):
+        known, mentioned = linked_issues(self.pr, [cross_reference(12, is_pr=False), cross_reference(60)])
+        self.assertEqual(known, {12})
+        self.assertEqual(mentioned, {7})  # #12 already known; bare #1 and #3 are prose
+
+    def test_rival_merged_while_this_pr_waited(self):
+        found = merged_rival(self.pr, {12: [cross_reference(61, merged_day=3), cross_reference(62, merged_day=1)]})
+        self.assertEqual(found[:2], (62, 12))
+
+    def test_rival_merged_before_this_pr_opened_is_ignored(self):
+        opened_later = {**self.pr, "created_at": at(5)}
+        self.assertIsNone(merged_rival(opened_later, {12: [cross_reference(61, merged_day=3)]}))
+
+    def test_unmerged_rivals_and_this_pr_are_ignored(self):
+        self.assertIsNone(merged_rival(self.pr, {12: [cross_reference(61), cross_reference(50, merged_day=2)]}))
+
+
 class LabelTests(unittest.TestCase):
     def test_configurator_provisions_every_runtime_label(self):
-        self.assertLessEqual(set(QUEUE_LABELS.values()), set(PROVISIONED))
+        self.assertLessEqual(set(QUEUE_LABELS.values()) | {SUPERSEDED}, set(PROVISIONED))
 
 
 if __name__ == "__main__":

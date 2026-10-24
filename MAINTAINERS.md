@@ -82,6 +82,7 @@ Admission's refusal and PR-Agent's review are the only automated responses on a 
 - After `HELICOPTER_QUEUE_NUDGE_HOURS` (default 168, seven days), one comment mentions the requested reviewers.
 - After `HELICOPTER_QUEUE_PAUSE_HOURS` (default 504, 21 days), the pull request is labelled `queue:no-capacity` and the contributor is told publicly. It stays open.
 - Drafts are not queued. Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) are queued only in `team` mode; see [Busy internal teams](docs/maintainer-modes.md#busy-internal-teams).
+- When another pull request that references the same issue merges while this one waits, the pull request is labelled `queue:possibly-superseded` and gets one comment naming it. Nothing closes automatically and the turn doesn't change; close them in a batch from the hopper below. On oh-my-pi this flagged 16 of 51 superseded closures and none of 60 merged pull requests.
 
 `contribution-queue.yml` reconciles every hour and on pull request comments, so hour thresholds mean something. Maintainer reviews on fork pull requests are picked up by the next sweep. On a private repository each sweep uses a few Actions minutes; lower the cron frequency if day thresholds are enough.
 
@@ -92,6 +93,7 @@ Admission's refusal and PR-Agent's review are the only automated responses on a 
 | Quick wins | `org:OWNER is:pr is:open label:"queue:awaiting-reviewer" label:"Review effort 1/5","Review effort 2/5" -label:"Possible security concern"` |
 | Security | `org:OWNER is:pr is:open label:"queue:awaiting-reviewer" label:"Possible security concern"` |
 | Deep-review candidates | `org:OWNER is:pr is:open label:"queue:awaiting-reviewer" label:"Review effort 4/5","Review effort 5/5"` |
+| Possibly superseded | `org:OWNER is:pr is:open label:"queue:possibly-superseded"` |
 | Everything waiting, oldest first | `org:OWNER is:pr is:open label:"queue:awaiting-reviewer" sort:created-asc` |
 
 Pull requests without a first review (no key configured) appear only in the last search.
