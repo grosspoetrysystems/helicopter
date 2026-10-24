@@ -131,7 +131,7 @@ Rulesets, CODEOWNERS, independent CI, dependency and security checks, and human 
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Every contribution needs an accountable human who can explain the change and respond to review.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Sign off your commits; the pull request needs only Change, Verification, and Risk.
 
 ## Security
 

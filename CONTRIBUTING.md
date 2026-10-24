@@ -1,22 +1,14 @@
 # Contributing to Helicopter
 
-Helicopter welcomes human-authored, AI-assisted, and agent-authored work when it is useful, reviewable, and owned by an accountable person.
+Helicopter welcomes useful, reviewable work however it was produced.
 
 ## Your agreement
 
-You agree once, not on every pull request. Signing off your commits (see [Legal](#legal)) means you:
-
-- reviewed the complete diff;
-- understand and can explain the change;
-- verified the evidence reported in the pull request;
-- can revise the contribution in response to review; and
-- have the right to submit it under Helicopter's license and contribution terms.
-
-AI assistance does not transfer those responsibilities to a model, provider, agent, bot, or tool.
+You agree once, not on every pull request: sign off your commits under the [Developer Certificate of Origin](#legal), which certifies you have the right to submit the change. Pull requests themselves carry no declarations; reviewers judge the change, its verification, and its risk.
 
 ## AI and agent use
 
-You don't need to declare how a change was produced. Reviewers judge the change, its verification, and its risk, the same way for everyone.
+You don't need to declare how a change was produced.
 
 A project adopting Helicopter can require disclosure by setting the repository variable `HELICOPTER_REQUIRE_DISCLOSURE` to `true` and adding a `## Disclosure` section to its pull request template. That section then must link a verifiable record, such as an [Agent Trace](https://agent-trace.dev/) file, or describe material AI or agent involvement, or say `None`. Never publish raw transcripts that may contain secrets, personal data, or restricted source material.
 
