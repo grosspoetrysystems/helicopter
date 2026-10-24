@@ -90,27 +90,36 @@ def turn(
     return Turn(whose, since, reason)
 
 
-def plan(current: Turn, now: datetime, nudge_days: int, pause_days: int) -> tuple[str, str | None]:
+def _hours(current: Turn, now: datetime) -> float:
+    return (now - current.since).total_seconds() / 3600
+
+
+def _waited(current: Turn, now: datetime) -> str:
+    hours = int(_hours(current, now))
+    return f"{hours} hours" if hours < 48 else f"{hours // 24} days"
+
+
+def plan(current: Turn, now: datetime, nudge_hours: int, pause_hours: int) -> tuple[str, str | None]:
     """Return the queue label and the notice due (nudge, pause, or None)."""
     if current.whose == "author":
         return LABELS["author"], None
-    waited = (now - current.since).days
-    if waited >= pause_days:
+    waited = _hours(current, now)
+    if waited >= pause_hours:
         return LABELS["paused"], "pause"
-    if waited >= nudge_days:
+    if waited >= nudge_hours:
         return LABELS["reviewer"], "nudge"
     return LABELS["reviewer"], None
 
 
 def notice(kind: str, current: Turn, now: datetime, author: str, owners: list[str]) -> str:
-    waited = (now - current.since).days
+    waited = _waited(current, now)
     marker = NOTICE_MARKER.format(kind=kind, since=current.since.isoformat())
     if kind == "nudge":
         who = " ".join(f"@{owner}" for owner in owners) or "Maintainers"
-        return f"{marker}\n{who}: this pull request has waited {waited} days for maintainer review."
+        return f"{marker}\n{who}: this pull request has waited {waited} for maintainer review."
     return (
         f"{marker}\n@{author}: no maintainer has had capacity to review this pull request in "
-        f"{waited} days. It stays open and keeps its place; any maintainer response moves it back "
+        f"{waited}. It stays open and keeps its place; any maintainer response moves it back "
         "into review. This is not a judgment of the change."
     )
 
@@ -159,12 +168,12 @@ def admitted(github: GitHub, sha: str) -> bool | None:
     return finished[0]["conclusion"] == "success"
 
 
-def reconcile(github: GitHub, pr: dict[str, Any], now: datetime, nudge_days: int, pause_days: int, ignored: frozenset[str]) -> None:
+def reconcile(github: GitHub, pr: dict[str, Any], now: datetime, nudge_hours: int, pause_hours: int, ignored: frozenset[str]) -> None:
     number = pr["number"]
     events = github.request("GET", f"issues/{number}/timeline?per_page=100")
     current = turn(pr, events, now, admitted(github, pr["head"]["sha"]), ignored)
     have = {label["name"] for label in pr["labels"]} & set(LABELS.values())
-    want, due = plan(current, now, nudge_days, pause_days) if current else (None, None)
+    want, due = plan(current, now, nudge_hours, pause_hours) if current else (None, None)
 
     for label in have - {want}:
         github.request("DELETE", f"issues/{number}/labels/{urllib.request.quote(label, safe='')}")
@@ -193,6 +202,11 @@ def reconcile(github: GitHub, pr: dict[str, Any], now: datetime, nudge_days: int
     print(f"#{number}: {want or 'no label'}; {state}{'; ' + due if due else ''}")
 
 
+def queued(pr: dict[str, Any], team: bool) -> bool:
+    """Open pull requests from outside contributors are queued; in team mode, members' too."""
+    return pr["state"] == "open" and (team or pr["author_association"] not in MAINTAINER)
+
+
 def require_labels(github: GitHub, wanted: set[str]) -> None:
     names = {label["name"] for label in github.request("GET", "labels?per_page=100")}
     missing = sorted(wanted - names)
@@ -210,8 +224,10 @@ def main() -> int:
     args = parser.parse_args()
 
     github = GitHub(os.environ["GITHUB_REPOSITORY"], os.environ["GITHUB_TOKEN"], args.dry_run)
-    nudge_days = int(os.environ.get("HELICOPTER_QUEUE_NUDGE_DAYS") or 7)
-    pause_days = int(os.environ.get("HELICOPTER_QUEUE_PAUSE_DAYS") or 21)
+    nudge_hours = int(os.environ.get("HELICOPTER_QUEUE_NUDGE_HOURS") or 168)
+    pause_hours = int(os.environ.get("HELICOPTER_QUEUE_PAUSE_HOURS") or 504)
+    # Team mode queues members' pull requests too; other modes queue outside contributions only.
+    team = os.environ.get("HELICOPTER_MODE") == "team"
     ignored = frozenset(filter(None, re.split(r"[\s,]+", os.environ.get("HELICOPTER_AUTOMATION_LOGINS", ""))))
     now = datetime.now(timezone.utc)
     require_labels(github, set(LABELS.values()))
@@ -220,10 +236,10 @@ def main() -> int:
     # (GITHUB_TOKEN allows 1,000 requests/hour). Batch through GraphQL beyond that.
     pulls = [github.request("GET", f"pulls/{args.pr}")] if args.pr else github.request("GET", "pulls?state=open&per_page=100")
     for pr in pulls:
-        if pr["state"] != "open" or pr["author_association"] in MAINTAINER:
+        if not queued(pr, team):
             print(f"#{pr['number']}: skipped ({pr['state'] if pr['state'] != 'open' else 'maintainer-authored'})")
             continue
-        reconcile(github, pr, now, nudge_days, pause_days, ignored)
+        reconcile(github, pr, now, nudge_hours, pause_hours, ignored)
     return 0
 
 

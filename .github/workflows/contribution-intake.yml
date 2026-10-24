@@ -101,7 +101,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          HELICOPTER_QUEUE_NUDGE_DAYS: ${{ vars.HELICOPTER_QUEUE_NUDGE_DAYS }}
-          HELICOPTER_QUEUE_PAUSE_DAYS: ${{ vars.HELICOPTER_QUEUE_PAUSE_DAYS }}
+          HELICOPTER_QUEUE_NUDGE_HOURS: ${{ vars.HELICOPTER_QUEUE_NUDGE_HOURS }}
+          HELICOPTER_QUEUE_PAUSE_HOURS: ${{ vars.HELICOPTER_QUEUE_PAUSE_HOURS }}
           HELICOPTER_AUTOMATION_LOGINS: ${{ vars.HELICOPTER_AUTOMATION_LOGINS }}
         run: python3 trusted-base/scripts/pr_queue.py --pr "$PR_NUMBER"
