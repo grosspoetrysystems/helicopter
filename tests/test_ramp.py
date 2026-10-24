@@ -150,6 +150,24 @@ class SupersededTests(unittest.TestCase):
         flagged = {**self.pr, "labels": [{"name": SUPERSEDED}]}
         self.assertIsNone(check_superseded(NoCalls(), flagged, [cross_reference(12, is_pr=False)]))
 
+    def test_removing_the_label_dismisses_it(self):
+        class Recorder:
+            def __init__(self):
+                self.writes = []
+            def request(self, method, path, body=None):
+                if method != "GET":
+                    self.writes.append(path)
+                    return None
+                return [cross_reference(61, merged_day=3)] if path.startswith("issues/12/timeline") else {}
+        events = [cross_reference(12, is_pr=False)]
+        first = Recorder()
+        self.assertEqual(check_superseded(first, {**self.pr, "labels": []}, events), 61)
+        self.assertEqual(first.writes, ["issues/50/labels", "issues/50/comments"])
+        posted = {"event": "commented", "actor": {"login": "github-actions[bot]"}, "body": "<!-- helicopter:superseded by=#61 -->\n..."}
+        later = Recorder()
+        self.assertIsNone(check_superseded(later, {**self.pr, "labels": []}, events + [posted]))
+        self.assertEqual(later.writes, [])
+
     def test_unmerged_rivals_and_this_pr_are_ignored(self):
         self.assertIsNone(merged_rival(self.pr, {12: [cross_reference(61), cross_reference(50, merged_day=2)]}))
 

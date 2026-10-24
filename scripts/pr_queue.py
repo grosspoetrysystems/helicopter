@@ -271,13 +271,14 @@ def check_superseded(github: GitHub, pr: dict[str, Any], events: list[dict[str, 
     if not found:
         return None
     rival, issue, merged_at = found
-    github.request("POST", f"issues/{number}/labels", {"labels": [SUPERSEDED]})
     marker = SUPERSEDED_MARKER.format(rival=rival)
-    if not any(
+    if any(
         (event.get("actor") or event.get("user") or {}).get("login") == BOT and (event.get("body") or "").startswith(marker)
         for event in events
     ):
-        github.request("POST", f"issues/{number}/comments", {"body": superseded_notice(rival, issue, merged_at)})
+        return None  # already flagged for this rival; a maintainer who removed the label dismissed it
+    github.request("POST", f"issues/{number}/labels", {"labels": [SUPERSEDED]})
+    github.request("POST", f"issues/{number}/comments", {"body": superseded_notice(rival, issue, merged_at)})
     return rival
 
 
