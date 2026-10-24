@@ -119,9 +119,11 @@ class QueueScopeTests(unittest.TestCase):
     def test_closed_pull_requests_are_never_queued(self):
         self.assertFalse(queued({**PR, "state": "closed", "author_association": "MEMBER"}, team=True))
 
-    def test_authorized_automation_is_never_queued(self):
+    def test_authorized_automation_is_queued_like_maintainer_work(self):
         pr = {**PR, "state": "open", "author_association": "NONE", "user": {"login": "dependabot[bot]"}}
-        self.assertFalse(queued(pr, team=True, automation=frozenset({"dependabot[bot]"})))
+        bots = frozenset({"dependabot[bot]"})
+        self.assertFalse(queued(pr, team=False, automation=bots))
+        self.assertTrue(queued(pr, team=True, automation=bots))
         self.assertTrue(queued(pr, team=False))
 
 

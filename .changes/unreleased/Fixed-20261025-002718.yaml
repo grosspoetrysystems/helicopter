@@ -1,3 +1,3 @@
 kind: Fixed
-body: 'The queue no longer fails when the queue: labels are missing and no pull request needs one, and it never queues pull requests from bots listed in HELICOPTER_AUTOMATION_LOGINS.'
+body: The queue no longer fails when the queue labels are missing and no pull request needs one. Pull requests from bots in HELICOPTER_AUTOMATION_LOGINS are treated like the maintainer's own, skipped outside team mode.
 time: 2026-10-25T00:27:18.027942+02:00

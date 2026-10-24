@@ -57,7 +57,7 @@ Sound defaults for any repository, with or without agents. The configurator appl
 | `.github/dependabot.yml` | Keeps pinned action SHAs current, grouped into one weekly pull request. New versions wait 7 days (GitHub's default is 3); security updates are never delayed. Dependabot can't update `docker://` images, so bump the PR-Agent image by hand. |
 | CODEOWNERS on `.github/`, `scripts/`, `tests/`, `.pr_agent.toml`, `AGENTS.md`, and policy files | Changes to automation and policy always reach a maintainer. |
 
-**Authorized automation.** Bots listed in `HELICOPTER_AUTOMATION_LOGINS` pass admission on branches of this repository without the pull request template; human review still applies. The configurator sets it to `dependabot[bot]` when it's unset; if you already set it, add `dependabot[bot]` yourself.
+**Authorized automation.** Bots listed in `HELICOPTER_AUTOMATION_LOGINS` pass admission on branches of this repository without the pull request template; human review still applies. The queue treats their pull requests like the maintainer's own: skipped in `solo` and `contributor` modes, queued in `team` mode. The configurator sets it to `dependabot[bot]` when it's unset; if you already set it, add `dependabot[bot]` yourself.
 
 ## Trust decisions
 

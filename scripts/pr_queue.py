@@ -281,12 +281,12 @@ def check_superseded(github: GitHub, pr: dict[str, Any], events: list[dict[str, 
 
 
 def queued(pr: dict[str, Any], team: bool, automation: frozenset[str] = frozenset()) -> bool:
-    """Open pull requests from outside contributors are queued; in team mode, members' too. Authorized bots never are."""
-    return (
-        pr["state"] == "open"
-        and pr["user"]["login"] not in automation
-        and (team or pr["author_association"] not in MAINTAINER)
-    )
+    """Open pull requests from outside contributors are queued; in team mode, everyone's.
+
+    Authorized bots (HELICOPTER_AUTOMATION_LOGINS) count as the maintainer's own delegated work.
+    """
+    outside = pr["author_association"] not in MAINTAINER and pr["user"]["login"] not in automation
+    return pr["state"] == "open" and (team or outside)
 
 
 def require_labels(github: GitHub, wanted: set[str]) -> None:
