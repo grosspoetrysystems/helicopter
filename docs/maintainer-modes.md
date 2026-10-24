@@ -26,7 +26,7 @@ gh auth status
 python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY
 ```
 
-Add `--dry-run` to print every change without making it. Add `--extra-check NAME` (repeatable) to require another status check, but only one your `pull_request` workflows report on every pull request; a required check that never reports blocks every merge. Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
+Add `--dry-run` to print every change without making it. Checks the branch already requires are kept. Add `--extra-check NAME` (repeatable) to require another status check, but only one your `pull_request` workflows report on every pull request; a required check that never reports blocks every merge. If you renamed Helicopter's `test-validator` or `validate-metadata` jobs, don't run the configurator as is: it would require the original names, which never report. Replace `MODE` with `solo`, `contributor`, or `team`. The configurator:
 
 1. protects the default branch;
 2. requires up-to-date `test-validator` and `validate-metadata` checks;

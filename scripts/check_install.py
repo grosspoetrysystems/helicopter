@@ -44,6 +44,18 @@ NOT_SHIPPED = (
     ".github/workflows/release.yml",
 )
 
+# Adopters often have files with these names of their own, so a file counts as Helicopter's only when it
+# contains Helicopter's marker. Paths not listed are Helicopter-specific by name.
+DEV_MARKERS = {
+    ".changes/": "HELICOPTER_",
+    "AGENTS.md": "# Working on Helicopter",
+    "CHANGELOG.md": "HELICOPTER_",
+    "lefthook.yml": "dev_checks.py",
+    ".changie.yaml": "Action required",
+    ".github/workflows/checks.yml": "dev_checks.py",
+    ".github/workflows/release.yml": "release_manifest.py",
+}
+
 Fetch = Callable[[str], "tuple[int, Any]"]
 
 
@@ -125,7 +137,9 @@ def settings_findings(repository: str, fetch: Fetch) -> list[Finding]:
             check(
                 "required checks",
                 bool(checks.get("strict")) and set(REQUIRED_CHECKS) <= set(checks.get("contexts") or []),
-                f"require up-to-date {', '.join(REQUIRED_CHECKS)}; {configure}",
+                f"required are {', '.join(checks.get('contexts') or []) or 'none'}, up to date: {bool(checks.get('strict'))}. "
+                f"Helicopter's admission and test jobs are named {', '.join(REQUIRED_CHECKS)}; {configure}. "
+                "If you renamed those jobs, require the renamed checks instead: the configurator only knows the original names",
             )
             check(
                 "administrators follow review rules",
@@ -209,19 +223,29 @@ def file_findings(root: Path, repository: str) -> list[Finding]:
     """Check the checkout: safe workflows, the adopter's own names, no Helicopter development tooling."""
     findings: list[Finding] = []
     workflows = root / ".github/workflows"
-    if not (workflows / "contribution-intake.yml").is_file():
-        findings.append(Finding("FAIL", "Helicopter workflows", f"no {workflows / 'contribution-intake.yml'}; restore it, and run from the repository's checkout"))
-    problems = [p for f in sorted(workflows.glob("*.y*ml")) for p in workflow_problems(f.name, f.read_text())]
+    texts = {f.name: f.read_text() for f in sorted(workflows.glob("*.y*ml"))}
+    # Adopters may rename the workflow, so look for what it runs rather than its file name.
+    intake = [name for name, text in texts.items() if "pull_request_target" in text and "validate_pr.py" in text]
+    findings.append(Finding("PASS", f"admission workflow ({', '.join(intake)})") if intake else Finding(
+        "FAIL", "admission workflow", f"no workflow in {workflows} runs validate_pr.py on pull_request_target; restore contribution-intake.yml"))
+    problems = [p for name, text in texts.items() for p in workflow_problems(name, text)]
     findings.append(Finding("FAIL", "workflow trust boundary", "; ".join(problems)) if problems
                     else Finding("PASS", "workflows pinned; privileged jobs never touch pull request code"))
     if repository.lower() == HELICOPTER:
         return findings
 
-    leftovers = [name for name, marker in ((".github/CODEOWNERS", "@thekidnamedkd"), ("SECURITY.md", HELICOPTER))
+    leftovers = [name for name, marker in ((".github/CODEOWNERS", "Helicopter currently has one maintainer"), ("SECURITY.md", HELICOPTER))
                  if marker in ((root / name).read_text() if (root / name).is_file() else "")]
     findings.append(Finding("FAIL", "your own owners and contacts", f"replace Helicopter's in {', '.join(leftovers)}")
                     if leftovers else Finding("PASS", "your own owners and contacts"))
-    tooling = [path for path in NOT_SHIPPED if (root / path).exists()]
+
+    def helicopters(path: str) -> bool:
+        target = root / path
+        files = [f for f in target.rglob("*") if f.is_file()] if target.is_dir() else [target] if target.is_file() else []
+        marker = DEV_MARKERS.get(path)
+        return bool(files) and (marker is None or any(marker in f.read_text(errors="ignore") for f in files))
+
+    tooling = [path for path in NOT_SHIPPED if helicopters(path)]
     findings.append(Finding("FAIL", "no Helicopter development tooling", f"delete {', '.join(tooling)}")
                     if tooling else Finding("PASS", "no Helicopter development tooling"))
     return findings
@@ -241,12 +265,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--repo", help="OWNER/REPOSITORY; defaults to the current repository")
     args = parser.parse_args()
-    repository = args.repo or subprocess.run(
+    checkout = subprocess.run(
         ["gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"],
         check=True, capture_output=True, text=True,
     ).stdout.strip()
-
-    findings = settings_findings(repository, gh_fetch) + file_findings(Path("."), repository)
+    repository = args.repo or checkout
+    findings = settings_findings(repository, gh_fetch)
+    if checkout.lower() == repository.lower():
+        findings += file_findings(Path("."), repository)
+    else:
+        findings.append(Finding("FAIL", "files", f"this checkout is {checkout}; run from {repository}'s checkout to check its files"))
     for finding in findings:
         print(f"{finding.status:<5} {finding.item}" + (f": {finding.detail}" if finding.detail else ""))
     failed = sum(finding.status == "FAIL" for finding in findings)

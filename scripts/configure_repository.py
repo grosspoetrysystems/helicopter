@@ -121,6 +121,12 @@ def configure(repository: str, mode: str, dry_run: bool = False, extra_checks: t
         run("variable", "set", "HELICOPTER_MODE", "--body", "contributor", "--repo", repository)
 
     default_branch = gh("repo", "view", repository, "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+    # Keep checks the repository already requires (its own CI, DCO): PUT replaces the whole list.
+    try:
+        current = json.loads(gh("api", f"repos/{repository}/branches/{default_branch}/protection/required_status_checks/contexts"))
+    except SystemExit:
+        current = []  # not protected yet
+    extra_checks = tuple(dict.fromkeys([*extra_checks, *(c for c in current if c not in REQUIRED_CHECKS)]))
     api("PUT", f"repos/{repository}/branches/{default_branch}/protection", protection(mode, extra_checks), dry_run)
 
     if mode == "solo":

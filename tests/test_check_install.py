@@ -156,18 +156,43 @@ class FileTests(unittest.TestCase):
         findings = file_findings(ROOT, "grosspoetrysystems/helicopter")
         self.assertEqual([f for f in findings if f.status != "PASS"], [])
 
-    def test_an_adopters_copy_needs_its_own_owners_and_no_dev_tooling(self):
+    def adopter(self, files: dict[str, str]) -> dict[str, str]:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / ".github/workflows").mkdir(parents=True)
-            (root / ".github/workflows/contribution-intake.yml").write_text(workflow("pull_request", ""))
-            (root / ".github/CODEOWNERS").write_text("* @thekidnamedkd\n")
-            (root / "SECURITY.md").write_text("Report at https://github.com/acme/project/security\n")
-            (root / ".changie.yaml").write_text("")
-            failed = {f.item: f.detail for f in file_findings(root, REPO) if f.status == "FAIL"}
+            for name, text in {".github/workflows/pr-contract.yml": workflow(
+                "pull_request_target", TRUSTED_CHECKOUT + "      - run: python3 trusted-base/scripts/validate_pr.py\n"
+            ), **files}.items():
+                (root / name).parent.mkdir(parents=True, exist_ok=True)
+                (root / name).write_text(text)
+            return {f.item: f.detail for f in file_findings(root, REPO) if f.status == "FAIL"}
+
+    def test_a_renamed_admission_workflow_counts(self):
+        self.assertEqual(self.adopter({}), {})
+
+    def test_missing_admission_workflow_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / ".github/workflows").mkdir(parents=True)
+            failed = [f.item for f in file_findings(Path(directory), REPO) if f.status == "FAIL"]
+        self.assertEqual(failed, ["admission workflow"])
+
+    def test_helicopters_owners_and_dev_tooling_are_caught(self):
+        failed = self.adopter({
+            ".github/CODEOWNERS": "# Helicopter currently has one maintainer. Adopting projects must replace it.\n",
+            ".changie.yaml": "kinds:\n  - label: Action required\n",
+            "scripts/dev_checks.py": "",
+        })
         self.assertEqual(set(failed), {"your own owners and contacts", "no Helicopter development tooling"})
         self.assertIn(".github/CODEOWNERS", failed["your own owners and contacts"])
         self.assertIn(".changie.yaml", failed["no Helicopter development tooling"])
+        self.assertIn("scripts/dev_checks.py", failed["no Helicopter development tooling"])
+
+    def test_an_adopters_own_files_with_the_same_names_pass(self):
+        self.assertEqual(self.adopter({
+            ".github/CODEOWNERS": "# Poolboy currently has one maintainer.\n* @thekidnamedkd\n",
+            "lefthook.yml": "pre-commit:\n  commands:\n    go-format:\n      run: go fmt\n",
+            ".github/workflows/release.yml": workflow("push", ""),
+            ".changes/unreleased/Added-1.yaml": "kind: Added\n",
+        }), {})
 
 
 if __name__ == "__main__":
