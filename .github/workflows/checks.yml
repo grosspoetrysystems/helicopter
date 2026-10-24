@@ -21,7 +21,9 @@ jobs:
       - name: Workflow invariants
         run: python3 scripts/dev_checks.py workflows
 
+      # Dependabot's pin bumps don't need release notes; the release manifest's hashes still carry them.
       - name: Changelog fragment
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         env:
           BASE_REF: ${{ github.base_ref }}
         run: python3 scripts/dev_checks.py changes "origin/$BASE_REF" HEAD
