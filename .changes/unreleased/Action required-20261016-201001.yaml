@@ -1,5 +1,0 @@
-kind: Action required
-body: 'The configurator applies the repository baseline, and maintainer-listed bots (HELICOPTER_AUTOMATION_LOGINS) pass admission on branches of the repository.'
-time: 2026-10-16T20:10:01.000000+00:00
-custom:
-  Action: 'Copy .github/dependabot.yml, then run scripts/configure_repository.py MODE --dry-run, review the output, and run it without --dry-run. If you already set HELICOPTER_AUTOMATION_LOGINS, add dependabot[bot].'

@@ -1,5 +1,0 @@
-kind: Action required
-body: 'The queue measures waits in hours (HELICOPTER_QUEUE_NUDGE_HOURS, default 168; HELICOPTER_QUEUE_PAUSE_HOURS, default 504), sweeps hourly, and in team mode also queues members'' pull requests.'
-time: 2026-10-16T20:05:00.000000+00:00
-custom:
-  Action: 'If you set HELICOPTER_QUEUE_NUDGE_DAYS or HELICOPTER_QUEUE_PAUSE_DAYS, replace them with the _HOURS variables (multiply by 24).'
