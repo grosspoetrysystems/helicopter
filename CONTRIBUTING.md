@@ -6,6 +6,8 @@ Helicopter welcomes useful, reviewable work however it was produced.
 
 You agree once, not on every pull request: sign off your commits under the [Developer Certificate of Origin](#legal), which certifies you have the right to submit the change. Pull requests themselves carry no declarations; reviewers judge the change, its verification, and its risk.
 
+What we expect of every contributor, however the change was produced: you've read the whole diff, you can explain it, and you'll revise it in response to review. Using AI doesn't hand those to a tool.
+
 ## AI and agent use
 
 You don't need to declare how a change was produced.
