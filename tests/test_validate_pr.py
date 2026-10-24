@@ -10,7 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from configure_repository import protection
+from configure_repository import baseline, protection, tag_ruleset
 from validate_pr import validate_body
 
 SCRIPT = ROOT / "scripts" / "validate_pr.py"
@@ -181,11 +181,59 @@ class ValidateBodyTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
 
 
+class AuthorizedAutomationTests(unittest.TestCase):
+    def bot_event(self, login: str = "dependabot[bot]", head_repository_id: int = 100) -> dict[str, object]:
+        event = owner_event(author_type="Bot", sender_type="Bot", head_repository_id=head_repository_id)
+        event["pull_request"]["user"]["login"] = login
+        event["sender"]["login"] = login
+        return event
+
+    def test_listed_bot_on_a_repository_branch_is_admitted(self) -> None:
+        result = run_cli(self.bot_event(), "--automation-logins", "dependabot[bot], renovate[bot]")
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn("Authorized automation", result.stdout)
+
+    def test_unlisted_bot_or_fork_follows_the_contract(self) -> None:
+        for event, logins in (
+            (self.bot_event(login="other[bot]"), "dependabot[bot]"),
+            (self.bot_event(head_repository_id=101), "dependabot[bot]"),
+            (self.bot_event(), ""),
+        ):
+            result = run_cli(event, "--automation-logins", logins)
+            self.assertEqual(result.returncode, 1, result.stdout)
+
+    def test_listed_login_must_be_a_bot(self) -> None:
+        event = owner_event(author_association="NONE")
+        event["pull_request"]["user"]["login"] = event["sender"]["login"] = "dependabot[bot]"
+        self.assertEqual(run_cli(event, "--automation-logins", "dependabot[bot]").returncode, 1)
+
+
 class ConfigureRepositoryTests(unittest.TestCase):
+    def test_workflows_get_read_only_tokens_and_cannot_approve(self) -> None:
+        calls = {endpoint: payload for _, endpoint, payload in baseline("o/r")}
+        self.assertEqual(
+            calls["repos/o/r/actions/permissions/workflow"],
+            {"default_workflow_permissions": "read", "can_approve_pull_request_reviews": False},
+        )
+        self.assertEqual(
+            calls["repos/o/r/actions/permissions/fork-pr-contributor-approval"],
+            {"approval_policy": "first_time_contributors"},
+        )
+
+    def test_extra_checks_are_required_alongside_the_defaults(self) -> None:
+        contexts = protection("solo", ("checks",))["required_status_checks"]["contexts"]
+        self.assertEqual(contexts, ["test-validator", "validate-metadata", "checks"])
+
+    def test_release_tags_cannot_move_or_be_deleted(self) -> None:
+        ruleset = tag_ruleset()
+        self.assertEqual((ruleset["target"], ruleset["enforcement"]), ("tag", "active"))
+        self.assertEqual(ruleset["conditions"]["ref_name"]["include"], ["refs/tags/v*"])
+        self.assertEqual({rule["type"] for rule in ruleset["rules"]}, {"update", "deletion"})
+
     def test_mode_protection_presets(self) -> None:
         expected_reviews = {
             "solo": (0, False, False, False),
-            "contributor": (1, True, True, False),
+            "contributor": (1, True, True, True),
             "team": (1, True, True, True),
         }
         for mode, reviews in expected_reviews.items():
@@ -205,7 +253,7 @@ class ConfigureRepositoryTests(unittest.TestCase):
                     settings["required_status_checks"],
                     {"strict": True, "contexts": ["test-validator", "validate-metadata"]},
                 )
-                self.assertFalse(settings["enforce_admins"])
+                self.assertEqual(settings["enforce_admins"], mode == "team")
                 self.assertFalse(settings["allow_force_pushes"])
                 self.assertFalse(settings["allow_deletions"])
                 self.assertTrue(settings["required_conversation_resolution"])
