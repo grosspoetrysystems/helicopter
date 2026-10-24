@@ -1,74 +1,46 @@
 # Contributing to Helicopter
 
-Helicopter welcomes useful, reviewable work however it was produced.
+Helicopter welcomes useful, reviewable work, whether or not a tool helped write it. The rules below are enforced by checks, not by declarations. Everything under [Guidance](#guidance) is advice that no check enforces.
 
-## Your agreement
+## What's checked
 
-You agree once, not on every pull request: sign off your commits under the [Developer Certificate of Origin](#legal), which certifies you have the right to submit the change. Pull requests themselves carry no declarations; reviewers judge the change, its verification, and its risk.
+| Rule | Enforced by | Refusal code |
+| --- | --- | --- |
+| The description has **Change**, **Verification**, and **Risk** sections, each filled in | `validate-metadata` (required check) | `REFUSE_TEMPLATE_INCOMPLETE`, `REFUSE_CHANGE_EMPTY`, `REFUSE_VERIFICATION_EMPTY`, `REFUSE_RISK_UNCHECKED` |
+| Every commit carries `Signed-off-by` with its author's email ([DCO](#legal)); merge commits are skipped | `validate-metadata` | `REFUSE_SIGNOFF_MISSING` |
+| A bot can open pull requests only when a maintainer has listed it in `HELICOPTER_AUTOMATION_LOGINS` | `validate-metadata` | `REFUSE_BOT_UNAUTHORIZED` |
+| Contributors without write access have at most two open non-draft pull requests (drafts don't count) | `validate-metadata` | `REFUSE_OPEN_PR_LIMIT` |
+| Merging needs the required checks to pass and the reviews your mode requires; nobody can force-push or delete the default branch | Branch protection set by `configure_repository.py` | — |
+| Changes to workflows, security, dependencies, release machinery, policy, or agent instructions need the owners in `.github/CODEOWNERS` (contributor and team modes) | Branch protection (code-owner review) | — |
+| Helicopter reruns its own checks; your report of what you ran is context, not evidence | Project CI | — |
 
-What we expect of every contributor, however the change was produced: you've read the whole diff, you can explain it, and you'll revise it in response to review. Using AI doesn't hand those to a tool.
+Each refusal says how to fix it. After fixing, push or edit the description to re-run the check.
 
-## AI and agent use
+## Working with us
 
-You don't need to declare how a change was produced. If a tool helped, the commit trailer it adds is welcome, for example the Linux kernel's `Assisted-by: AGENT_NAME:MODEL_VERSION`. An AI tool never adds `Signed-off-by`; only a person certifies the DCO. Never publish raw transcripts that may contain secrets, personal data, or restricted source material.
+Use a draft pull request while work is incomplete. When you've addressed review, push your changes and reply, or press **Re-request review**. Either one hands the pull request back to a maintainer. Labels show whose turn it is: `queue:awaiting-author` is yours, `queue:awaiting-reviewer` is ours. An automated review may comment on your change first; it's advisory and can't approve.
 
-An agent must not:
+## Guidance
 
-- impersonate a person or conceal material automation;
-- approve or merge its own contribution;
-- bypass required checks or reviews;
-- change policy or security controls merely to make its own work pass;
-- use repository or deployment secrets in untrusted contribution CI;
-- post substantive answers as though they were the accountable human's judgment; or
-- flood Helicopter with speculative, duplicate, or unrelated submissions.
+No check enforces these; maintainers may still ask you to follow them.
 
-Maintainers moderate observable behavior and policy violations, not guesses that writing “looks AI-generated.”
+- Open or reference an accepted issue before starting a feature or public API change, a cross-cutting refactor, a dependency change, security-sensitive work, or a significant build, workflow, release, or policy change. Small fixes and documentation corrections can skip this.
+- Solve one coherent problem per pull request. Maintainers may ask you to split unrelated, generated, mechanical, or otherwise unreviewable changes.
+- Read the whole diff and be ready to explain and revise it, whoever or whatever wrote it.
+- Don't publish raw transcripts that may contain secrets, personal data, or restricted source material.
+- Operators of autonomous agents request authorization with the **Automation authorization** issue form before their agent opens issues, reviews, or comments; only pull requests from unlisted bots are refused automatically.
 
-## Before implementation
-
-Open or reference an accepted issue before starting:
-
-- a feature or public API change;
-- a cross-cutting refactor;
-- a dependency addition or replacement;
-- authentication, authorization, or security-sensitive work; or
-- a significant build, workflow, release, or policy change.
-
-Small bug fixes, documentation corrections, and focused maintenance may skip issue-first review unless a maintainer says otherwise.
-
-Unapproved bots and autonomous agents must not open issues, pull requests, reviews, or comments. Their accountable operator must request authorization with the **Automation authorization** issue form before they interact with Helicopter.
-
-## Pull request contract
-
-The pull request template has three required sections:
-
-- **Change:** the problem, the smallest solution, and its user-visible effect; link an accepted issue when required.
-- **Verification:** the commands or steps you ran and what they showed, or why verification doesn't apply.
-- **Risk:** check every area the change touches (dependencies, security, workflows, generated content), or `None of the above`.
-
-Each pull request should solve one coherent problem. If a section is missing or empty, the admission check names it and says how to fix it.
-
-Use a draft pull request while work is incomplete. Maintainers may ask you to split unrelated, generated, mechanical, or otherwise unreviewable changes. Passing CI does not guarantee acceptance.
-
-When you have addressed review, push your changes and reply, or press **Re-request review**. Either one hands the pull request back to a maintainer. Labels show whose turn it is: `queue:awaiting-author` is yours, `queue:awaiting-reviewer` is ours. An automated review may comment on your change first.
-
-Contributors without write access may have at most **two non-draft pull requests** open at once unless a maintainer grants an exception.
-
-## Review
-
-Helicopter independently reruns relevant checks. Contributor and agent reports are useful context, not authoritative evidence. AI review is advisory and cannot replace required human approval.
-
-Changes to workflows, security, authentication, dependencies, release machinery, contribution policy, or agent instructions require the owners named in `.github/CODEOWNERS`.
+Passing every check does not guarantee acceptance.
 
 ## Legal
 
-Helicopter uses [Developer Certificate of Origin 1.1](https://developercertificate.org/). Sign off every commit:
+Helicopter uses the [Developer Certificate of Origin 1.1](https://developercertificate.org/). Sign off every commit (`git commit -s`):
 
 ```text
 Signed-off-by: Your Name <your.email@example.com>
 ```
 
-A person or authorized organization, not an AI system, makes that certification. A project adopting Helicopter can use a contributor license agreement (CLA) instead: replace this section with the CLA's terms and configure the CLA check in place of the DCO check.
+The sign-off is the one agreement you make: whoever signs off answers for the change. A project adopting Helicopter can use a contributor license agreement (CLA) instead: set the `HELICOPTER_SIGNOFF` repository variable to `off`, replace this section with the CLA's terms, and add the CLA check.
 
 Maintainers also sign their commits (`git commit -S`); outside contributors don't have to.
 

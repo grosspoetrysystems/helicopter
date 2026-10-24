@@ -1,0 +1,5 @@
+kind: Action required
+body: Admission now refuses pull requests with unsigned commits, from bots not listed in HELICOPTER_AUTOMATION_LOGINS, and from outside contributors over the open pull request limit; CONTRIBUTING lists each rule next to its check.
+time: 2026-10-24T23:12:12.19206+02:00
+custom:
+    Action: Using a CLA? Set the HELICOPTER_SIGNOFF repository variable to off. Set HELICOPTER_OPEN_PR_LIMIT to change the default limit of 2 (0 turns it off).

@@ -5,9 +5,9 @@ Helicopter's files express policy; GitHub settings enforce it. This guide covers
 ## Activate the repository
 
 - [ ] When adopting Helicopter, replace its name, URLs, contacts, and CODEOWNERS with the target project's values.
-- [ ] Confirm DCO is the intended legal mechanism and configure its sign-off check, or replace it with the target project's CLA/CA process.
-- [ ] Decide which bot or GitHub App identities, if any, may interact with the repository. List automation that has collaborator access (for example an AI reviewer account) in the `HELICOPTER_AUTOMATION_LOGINS` repository variable so its comments do not count as maintainer responses.
-- [ ] Review the two-PR limit and issue-first categories in `CONTRIBUTING.md`.
+- [ ] Confirm DCO is the intended legal mechanism. Admission checks every commit's sign-off; for a CLA instead, set the `HELICOPTER_SIGNOFF` repository variable to `off` and add the CLA check.
+- [ ] Decide which bot or GitHub App identities, if any, may open pull requests or otherwise interact with the repository. Admission refuses pull requests from bots not listed in the `HELICOPTER_AUTOMATION_LOGINS` repository variable. Also list automation that has collaborator access (for example an AI reviewer account) so its comments do not count as maintainer responses.
+- [ ] Set the open pull request limit for contributors without write access with the `HELICOPTER_OPEN_PR_LIMIT` repository variable (default 2; `0` turns it off), and review the issue-first guidance in `CONTRIBUTING.md`.
 - [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
 - [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
 - [ ] Optionally add a `HELICOPTER_REVIEW_KEY` secret (an OpenRouter key with a credit limit) to turn on the first review (see [Review ramp](#review-ramp)). An organization secret shared with selected repositories gives one key and one limit across projects.
@@ -44,7 +44,7 @@ The intake and queue workflows use `pull_request_target`, `issue_comment`, and `
 
 | Job | Token | Secret |
 | --- | --- | --- |
-| `validate-metadata` | `contents: read` | none |
+| `validate-metadata` | `contents`, `pull-requests: read` | none |
 | `first-review` | `contents: read`; `issues`, `pull-requests: write` | `HELICOPTER_REVIEW_KEY` |
 | `queue` (both workflows) | `contents`, `checks: read`; `issues`, `pull-requests: write` | none |
 
