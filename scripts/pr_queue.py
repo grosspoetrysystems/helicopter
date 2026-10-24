@@ -263,14 +263,15 @@ def check_superseded(github: GitHub, pr: dict[str, Any], events: list[dict[str, 
     Never closes and never changes whose turn it is: the label gives the maintainer one hopper to batch-close from.
     """
     number = pr["number"]
+    if SUPERSEDED in {label["name"] for label in pr["labels"]}:
+        return None  # already flagged; skip the issue lookups on every later sweep
     known, mentioned = linked_issues(pr, events)
     issues = known | {n for n in mentioned if is_issue(github, n)}
     found = merged_rival(pr, {n: github.request("GET", f"issues/{n}/timeline?per_page=100") for n in sorted(issues)})
     if not found:
         return None
     rival, issue, merged_at = found
-    if SUPERSEDED not in {label["name"] for label in pr["labels"]}:
-        github.request("POST", f"issues/{number}/labels", {"labels": [SUPERSEDED]})
+    github.request("POST", f"issues/{number}/labels", {"labels": [SUPERSEDED]})
     marker = SUPERSEDED_MARKER.format(rival=rival)
     if not any(
         (event.get("actor") or event.get("user") or {}).get("login") == BOT and (event.get("body") or "").startswith(marker)
@@ -310,8 +311,8 @@ def main() -> int:
     now = datetime.now(timezone.utc)
     require_labels(github, set(LABELS.values()) | {SUPERSEDED})
 
-    # ponytail: one timeline call per open PR, plus one per linked issue; fine to a few hundred open PRs per sweep
-    # (GITHUB_TOKEN allows 1,000 requests/hour). Batch through GraphQL beyond that.
+    # ponytail: about 3 calls per open PR per sweep (check runs, timeline, one per linked issue until flagged), so the
+    # hourly sweep fits ~300 open PRs in GITHUB_TOKEN's 1,000 requests/hour. Beyond that, lower the cron or batch via GraphQL.
     pulls = [github.request("GET", f"pulls/{args.pr}")] if args.pr else github.request("GET", "pulls?state=open&per_page=100")
     for pr in pulls:
         if not queued(pr, team):
