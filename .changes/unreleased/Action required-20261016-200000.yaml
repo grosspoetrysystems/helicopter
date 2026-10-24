@@ -1,5 +1,0 @@
-kind: Action required
-body: 'The pull request contract keeps only Change, Verification, and Risk: the per-PR attestations, the AI-origin choice, and the agent metadata and capabilities block are gone, and agreement is a one-time DCO sign-off. Projects can opt in to required disclosure with HELICOPTER_REQUIRE_DISCLOSURE=true.'
-time: 2026-10-16T20:00:00.000000+00:00
-custom:
-  Action: 'Replace .github/pull_request_template.md and the contract sections of CONTRIBUTING.md with Helicopter''s. To require disclosure, set HELICOPTER_REQUIRE_DISCLOSURE=true and add a "## Disclosure" section to your template.'

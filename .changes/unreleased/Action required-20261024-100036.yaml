@@ -1,5 +1,0 @@
-kind: Action required
-body: The queue labels a pull request queue:possibly-superseded, with one comment, when another pull request for the same issue merged while it waited; nothing closes automatically.
-time: 2026-10-24T10:00:36.155987+02:00
-custom:
-    Action: Run scripts/configure_repository.py again to create the queue:possibly-superseded label.

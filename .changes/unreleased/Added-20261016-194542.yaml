@@ -1,3 +1,0 @@
-kind: Added
-body: 'Development checks for Helicopter itself: Lefthook hooks and a CI workflow for tests, actionlint, zizmor, workflow invariants, changelog fragments, and Conventional Commits.'
-time: 2026-10-16T19:45:42.67699+02:00
