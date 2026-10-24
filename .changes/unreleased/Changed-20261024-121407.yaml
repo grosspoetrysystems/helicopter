@@ -1,0 +1,3 @@
+kind: Changed
+body: Removing queue:possibly-superseded now dismisses it for good, and flagged pull requests no longer cost API calls on every hourly sweep.
+time: 2026-10-24T12:14:07.221574+02:00
