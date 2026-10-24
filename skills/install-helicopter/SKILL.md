@@ -52,7 +52,7 @@ Then make the files the project's own:
 - `AGENTS.md` (create it if missing): add one line, `Contribution governance comes from Helicopter; see .github/helicopter/version.json. Update it with the install-helicopter skill.`
 - Project builds and tests go in their own `pull_request` workflow with no secrets. Never add a checkout of pull request code, or a step that runs it, to `contribution-intake.yml` or `contribution-queue.yml`.
 
-Keep the job names `test-validator` and `validate-metadata`. The configurator requires checks by those names, so renaming them blocks every merge.
+Keep these exactly as they are: the job names `test-validator` and `validate-metadata` (the configurator requires checks by those names, so renaming them blocks every merge), every `HELICOPTER_*` variable name, the `queue:` label names, and the `<!-- helicopter:... -->` comment markers the queue uses to find its own comments. Replace only owners, contacts, and the project's name in prose.
 
 ## 4. Verify and open the pull request
 

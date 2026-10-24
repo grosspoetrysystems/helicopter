@@ -27,6 +27,13 @@ REPOSITORY = "grosspoetrysystems/helicopter"
 # Must match scripts/check_install.py; tests/test_stage.py checks that they agree.
 VERSION_MARKER = ".github/helicopter/version.json"
 INSTALL_PATHS = {"LICENSE": ".github/helicopter/LICENSE"}
+# Older releases still listed Helicopter's own README and install guides, and had no install checker.
+FIRST_SUPPORTED = (0, 2, 0)
+
+
+def supported(version: str) -> bool:
+    numbers = tuple(int(part) for part in version.lstrip("v").split(".")[:3] if part.isdigit())
+    return len(numbers) == 3 and numbers >= FIRST_SUPPORTED
 
 
 def fetch(url: str) -> bytes:
@@ -81,6 +88,8 @@ def main() -> int:
 
     where = f"download/{args.version}" if args.version else "latest/download"
     manifest = json.loads(fetch(f"https://github.com/{REPOSITORY}/releases/{where}/helicopter.json"))
+    if not supported(manifest["version"]):
+        raise SystemExit(f"Helicopter {manifest['version']} predates this skill; install v0.2.0 or later. Nothing was written.")
     files = release_files(manifest, fetch(f"https://github.com/{REPOSITORY}/archive/{manifest['commit']}.tar.gz"))
     staging = Path(tempfile.mkdtemp(prefix=f"helicopter-{manifest['version']}-"))
     outcome = stage(manifest, files, args.target.resolve(), staging)

@@ -37,6 +37,12 @@ class StageTests(unittest.TestCase):
         self.assertEqual(stage.VERSION_MARKER, check_install.VERSION_MARKER)
         self.assertEqual(stage.INSTALL_PATHS, check_install.INSTALL_PATHS)
 
+    def test_releases_before_the_skill_are_refused(self):
+        self.assertFalse(stage.supported("v0.1.0"))
+        self.assertFalse(stage.supported("garbage"))
+        self.assertTrue(stage.supported("v0.2.0"))
+        self.assertTrue(stage.supported("v1.0.0"))
+
     def test_archive_files_are_checked_against_the_manifest(self):
         self.assertEqual(stage.release_files(manifest(RELEASE), archive({**RELEASE, "README.md": b"x"})), RELEASE)
         tampered = archive({**RELEASE, "scripts/validate_pr.py": b"evil\n"})
