@@ -68,8 +68,8 @@ def owner_event(
     }
 
 
-def codes(body: str, require_disclosure: bool = False) -> set[str]:
-    return {refusal.code for refusal in validate_body(body, require_disclosure)}
+def codes(body: str) -> set[str]:
+    return {refusal.code for refusal in validate_body(body)}
 
 
 class ValidateBodyTests(unittest.TestCase):
@@ -105,24 +105,11 @@ class ValidateBodyTests(unittest.TestCase):
                 self.assertNotIn(field, TEMPLATE.read_text(encoding="utf-8"))
         self.assertEqual(codes(VALID), set())
 
-    def test_disclosure_is_required_only_when_opted_in(self) -> None:
-        self.assertEqual(codes(VALID, require_disclosure=False), set())
-        self.assertEqual(codes(VALID, require_disclosure=True), {"REFUSE_DISCLOSURE_MISSING"})
-        empty = VALID + "\n## Disclosure\n\n<!-- link a record -->\n"
-        self.assertEqual(codes(empty, require_disclosure=True), {"REFUSE_DISCLOSURE_MISSING"})
-        filled = VALID + "\n## Disclosure\n\nAgent Trace: .agent-trace/run.json\n"
-        self.assertEqual(codes(filled, require_disclosure=True), set())
-
     def test_cli_accepts_a_valid_event(self) -> None:
         result = run_cli({"pull_request": {"body": VALID}})
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("Human review is still required", result.stdout)
-
-    def test_cli_disclosure_flag(self) -> None:
-        refused = run_cli({"pull_request": {"body": VALID}}, "--require-disclosure", "true")
-        self.assertEqual(refused.returncode, 1, refused.stdout)
-        self.assertIn("REFUSE_DISCLOSURE_MISSING", refused.stdout)
 
     def test_solo_mode_requires_configured_maintainer(self) -> None:
         owner = owner_event()

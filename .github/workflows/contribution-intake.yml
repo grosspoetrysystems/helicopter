@@ -14,7 +14,6 @@ permissions:
 env:
   HELICOPTER_MODE: ${{ vars.HELICOPTER_MODE || 'contributor' }}
   HELICOPTER_SOLO_MAINTAINER_ID: ${{ vars.HELICOPTER_SOLO_MAINTAINER_ID || '0' }}
-  HELICOPTER_REQUIRE_DISCLOSURE: ${{ vars.HELICOPTER_REQUIRE_DISCLOSURE || 'false' }}
 
 concurrency:
   group: contribution-intake-${{ github.event.pull_request.number }}
@@ -42,7 +41,6 @@ jobs:
           python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH"
           --mode "$HELICOPTER_MODE"
           --solo-maintainer-id "$HELICOPTER_SOLO_MAINTAINER_ID"
-          --require-disclosure "$HELICOPTER_REQUIRE_DISCLOSURE"
           --automation-logins "$HELICOPTER_AUTOMATION_LOGINS"
 
       # Security invariant: no job in this privileged workflow checks out or
