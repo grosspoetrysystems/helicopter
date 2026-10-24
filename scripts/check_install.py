@@ -272,8 +272,8 @@ def file_findings(root: Path, repository: str) -> list[Finding]:
     except (OSError, ValueError, KeyError, TypeError):
         findings.append(Finding("FAIL", "Helicopter version marker",
                                 f"no valid {VERSION_MARKER}; install or update with the install-helicopter skill so updates know their base"))
-    if not (root / INSTALL_PATHS["LICENSE"]).is_file():
-        findings.append(Finding("FAIL", "Helicopter license notice", f"copy Helicopter's MIT LICENSE to {INSTALL_PATHS['LICENSE']}"))
+    findings.append(Finding("PASS", "Helicopter license notice") if (root / INSTALL_PATHS["LICENSE"]).is_file() else
+                    Finding("FAIL", "Helicopter license notice", f"copy Helicopter's MIT LICENSE to {INSTALL_PATHS['LICENSE']}"))
     return findings
 
 
