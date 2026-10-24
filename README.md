@@ -27,7 +27,7 @@ Projects need better intake without building an agent platform or turning every 
 
 Helicopter adds a small policy layer to the normal GitHub pull request flow. Each pull request climbs a ramp: a cheaper step must pass before a more expensive one runs, and every step that stops it says why.
 
-1. The contributor describes the change, how it was verified, and what it risks. Accountability is a one-time agreement: the DCO sign-off on commits.
+1. The contributor describes the change, how it was verified, and what it risks. Accountability is a one-time agreement: the DCO sign-off, checked on every commit.
 2. A metadata-only check runs the validator from the protected default branch, at no cost.
 3. Optionally, an admitted pull request gets a [PR-Agent](https://github.com/the-pr-agent/pr-agent) review on cheap inference with your own key (a fraction of a cent): what works, what to fix, effort, tests, and security.
 4. The queue labels whose turn it is, nudges the owner after 7 days, and pauses publicly after 21 instead of going silent.
@@ -47,7 +47,7 @@ flowchart LR
     G -->|"Approved"| H["Human merge"]
 ```
 
-The validator checks that the required sections are filled in. It does not decide whether a patch is correct or whether a claim is true.
+The validator checks that the required sections are filled in, that every commit is signed off by its author, that unlisted bots stay out, and that outside contributors stay within the open pull request limit. It does not decide whether a patch is correct or whether a claim is true.
 
 ## Who it considers
 
@@ -114,7 +114,7 @@ Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole m
 
 ## Trust boundary
 
-No privileged Helicopter job checks out, builds, or executes the contributor head. `contribution-intake.yml` uses `pull_request_target` so its workflow, scripts, and review rules load from the protected default branch and its jobs can comment on fork pull requests. Admission reads metadata with `contents: read`. The first review runs PR-Agent pinned by image digest; it holds the optional model key and a write token so it can post its review, and reads the pull request only through the API. The queue job holds `issues`/`pull-requests: write` and `checks: read` and no secret. A head checkout, build, test, or PR-controlled action does not belong in that workflow.
+No privileged Helicopter job checks out, builds, or executes the contributor head. `contribution-intake.yml` uses `pull_request_target` so its workflow, scripts, and review rules load from the protected default branch and its jobs can comment on fork pull requests. Admission reads event metadata, the pull request's commits, and the author's open pull request count through the API, with `contents` and `pull-requests: read`. The first review runs PR-Agent pinned by image digest; it holds the optional model key and a write token so it can post its review, and reads the pull request only through the API. The queue job holds `issues`/`pull-requests: write` and `checks: read` and no secret. A head checkout, build, test, or PR-controlled action does not belong in that workflow.
 
 Project tests belong in a separate `pull_request` workflow on an ephemeral hosted runner with no secrets and minimum token permissions.
 
@@ -124,14 +124,14 @@ Helicopter cannot prove that:
 
 - the person who signed off reviewed or understands the patch;
 - the contribution is correct, safe, licensed, useful, or in scope;
-- a bot identity is authorized; or
+- an account that looks like a person isn't run by automation; or
 - maintainers have capacity to review the work. The queue makes missing capacity visible; it cannot create it.
 
 Rulesets, CODEOWNERS, independent CI, dependency and security checks, and human review remain the enforcement boundary.
 
 ## Contributing
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Sign off your commits; the pull request needs only Change, Verification, and Risk.
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request. Sign off every commit; the pull request description needs Change, Verification, and Risk.
 
 ## Security
 

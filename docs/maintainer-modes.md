@@ -53,11 +53,14 @@ Sound defaults for any repository, with or without agents. The configurator appl
 | Workflow token read-only by default; workflows can't approve pull requests | A compromised or confused workflow can't write, and automation can never supply the required approval. |
 | Approval for workflow runs from first-time contributors | A new account's pull request can't spend CI until a maintainer looks. |
 | Dependabot alerts and security updates, secret scanning, push protection, private vulnerability reporting | Known-vulnerable dependencies and committed secrets surface early; reports arrive privately. |
+| Web commits require sign-off | Commits made on GitHub, such as applied review suggestions, carry `Signed-off-by`, so admission's sign-off check accepts them. |
 | `v*` tags can't move or be deleted | Each release's manifest stays tied to the exact files it describes. |
 | `.github/dependabot.yml` | Keeps pinned action SHAs current, grouped into one weekly pull request. New versions wait 7 days (GitHub's default is 3); security updates are never delayed. Dependabot can't update `docker://` images, so bump the PR-Agent image by hand. |
 | CODEOWNERS on `.github/`, `scripts/`, `tests/`, `.pr_agent.toml`, `AGENTS.md`, and policy files | Changes to automation and policy always reach a maintainer. |
 
 **Authorized automation.** Bots listed in `HELICOPTER_AUTOMATION_LOGINS` pass admission on branches of this repository without the pull request template; human review still applies. The queue treats their pull requests like the maintainer's own: skipped in `solo` and `contributor` modes, queued in `team` mode. The configurator sets it to `dependabot[bot]` when it's unset; if you already set it, add `dependabot[bot]` yourself.
+
+**Admission settings.** `HELICOPTER_SIGNOFF` (default `dco`; `off` for projects using a CLA) controls the sign-off check. `HELICOPTER_OPEN_PR_LIMIT` (default 2; `0` turns it off) caps open non-draft pull requests for contributors without write access.
 
 ## Trust decisions
 
