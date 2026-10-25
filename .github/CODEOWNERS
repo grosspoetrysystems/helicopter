@@ -4,6 +4,7 @@
 # Automation, policy, and agent instructions always reach a maintainer.
 /.github/ @thekidnamedkd
 /scripts/ @thekidnamedkd
+/skills/ @thekidnamedkd
 /tests/ @thekidnamedkd
 /.pr_agent.toml @thekidnamedkd
 /AGENTS.md @thekidnamedkd

@@ -1,0 +1,3 @@
+kind: Added
+body: 'An install-helicopter agent skill installs from a release: it verifies every file against the release manifest, never overwrites your files, stages differing ones for merging, and records the version in .github/helicopter/version.json with Helicopter''s license beside it. check_install.py checks both.'
+time: 2026-10-25T01:16:12.679518+02:00

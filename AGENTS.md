@@ -34,6 +34,6 @@ Helicopter is a contribution-governance template for GitHub repositories: an adm
 
 Release tags can't be moved or deleted.
 
-## Development-only files
+## Files adopters don't get
 
-`AGENTS.md`, `lefthook.yml`, `.changie.yaml`, `.changes/`, `CHANGELOG.md`, `scripts/dev_checks.py`, `scripts/release_manifest.py`, `tests/test_dev_checks.py`, `tests/test_release_manifest.py`, `.github/workflows/checks.yml`, and `.github/workflows/release.yml` exist for developing Helicopter (`NOT_SHIPPED` in `scripts/dev_checks.py`). Adopters don't need them; the install removes them. The other tests ship, because adopters' required check `test-validator` runs them.
+Helicopter's development tooling (`AGENTS.md`, `lefthook.yml`, `.changie.yaml`, `.changes/`, `CHANGELOG.md`, `scripts/dev_checks.py`, `scripts/release_manifest.py`, their tests, `.github/workflows/checks.yml`, `.github/workflows/release.yml`), its own `README.md` and header image, the install guides, and the install skill (`skills/install-helicopter/`, with `tests/test_stage.py`) stay out of releases: `NOT_SHIPPED` in `scripts/check_install.py` lists them. The install copies only a release's manifest files, and the checker flags any of these in an adopter's copy. The other tests ship, because adopters' required check `test-validator` runs them.
