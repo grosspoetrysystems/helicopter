@@ -1,3 +1,9 @@
+---
+type: Guide
+title: Maintainer operating modes
+description: Choose solo, contributor, or team mode, configure the repository, and see the baseline settings.
+---
+
 # Maintainer operating modes
 
 Helicopter separates trusted project work from external contribution intake. Choose one repository mode:
