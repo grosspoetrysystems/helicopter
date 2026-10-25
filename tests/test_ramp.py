@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from configure_repository import QUEUE_LABELS as PROVISIONED
-from pr_queue import LABELS as QUEUE_LABELS, SUPERSEDED, check_superseded, linked_issues, merged_rival, notice, plan, queued, turn
+from pr_queue import LABELS as QUEUE_LABELS, SUPERSEDED, check_superseded, linked_issues, merged_rival, notice, plan, queued, turn, update_notice
 
 NOW = datetime(2026, 10, 30, tzinfo=timezone.utc)
 
@@ -177,6 +177,30 @@ class SupersededTests(unittest.TestCase):
 
     def test_unmerged_rivals_and_this_pr_are_ignored(self):
         self.assertIsNone(merged_rival(self.pr, {12: [cross_reference(61), cross_reference(50, merged_day=2)]}))
+
+
+class UpdateNoticeTests(unittest.TestCase):
+    class Recorder:
+        def __init__(self, titles=()):
+            self.repository, self.titles, self.posted = "o/r", list(titles), []
+
+        def request(self, method, path, body=None):
+            if method == "GET":
+                return {"items": [{"title": title} for title in self.titles]}
+            self.posted.append(body)
+
+    def test_newer_release_opens_one_issue_naming_its_action_steps(self):
+        github = self.Recorder()
+        self.assertEqual(update_notice(github, "v0.2.0", {"version": "v0.10.0", "action_required": 2}), "v0.10.0")
+        issue, = github.posted
+        self.assertEqual(issue["title"], "Helicopter v0.10.0 is available")
+        self.assertIn("2 Action required steps", issue["body"])
+
+    def test_current_or_already_notified_does_nothing(self):
+        for installed, titles in (("v0.3.0", ()), ("v0.4.0", ()), ("v0.2.0", ("Helicopter v0.3.0 is available",))):
+            github = self.Recorder(titles)
+            self.assertIsNone(update_notice(github, installed, {"version": "v0.3.0"}))
+            self.assertEqual(github.posted, [])
 
 
 class LabelTests(unittest.TestCase):

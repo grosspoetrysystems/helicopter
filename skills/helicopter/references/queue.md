@@ -11,4 +11,6 @@ Every open pull request from an outside contributor carries one label saying who
 
 Not queued: drafts, the maintainer's own pull requests outside `team` mode, and pull requests from bots listed in `HELICOPTER_AUTOMATION_LOGINS` (treated as the maintainer's own work).
 
+Once an hour, if `.github/helicopter/version.json` names an older release than Helicopter's latest, the queue opens one issue, "Helicopter VERSION is available". Close it to skip that release; it isn't reopened.
+
 The queue never closes or merges anything, and never changes a review requirement.

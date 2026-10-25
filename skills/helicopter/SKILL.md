@@ -47,7 +47,7 @@ To explain how something works or to change settings, see [References](#referenc
    1. `chore(helicopter): update to VERSION`: the `added`, `updated`, and `removed` files, `.github/helicopter/version.json`, and `.github/helicopter/LICENSE`. These are exactly the release's files, so this commit needs no review of its own.
    2. `chore(helicopter): merge VERSION into customized files`: every `merged`, resolved `conflict`, `differs`, and `missing` file. If they span unrelated areas (workflows, scripts, policy text), commit per area.
    3. One commit per Action required item that changes files.
-5. [Check](#check), then `gh pr create`. In the body: base and new version, the release notes link, every merge decision you made, and a checklist of Action required items that need the maintainer (settings, secrets, variables), with the exact command for each.
+5. [Check](#check), then `gh pr create`. In the body: `Closes #N` for an open "Helicopter VERSION is available" issue, base and new version, the release notes link, every merge decision you made, and a checklist of Action required items that need the maintainer (settings, secrets, variables), with the exact command for each.
 
 When `base_detected` is true, say so in the pull request and name the release; the maintainer confirms it.
 
