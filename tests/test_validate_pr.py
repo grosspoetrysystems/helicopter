@@ -242,6 +242,36 @@ class OpenPullRequestLimitTests(unittest.TestCase):
         self.assertEqual(self.run_with("NONE", 9, limit="0").returncode, 0)
 
 
+class ShapeTests(unittest.TestCase):
+    def run_with(self, association: str = "NONE", *arguments: str, **pull_request: object) -> subprocess.CompletedProcess[str]:
+        event = owner_event(author_association=association, author_id=2, sender_id=2)
+        event["repository"]["default_branch"] = "main"
+        event["pull_request"]["base"]["ref"] = pull_request.pop("base_ref", "main")
+        event["pull_request"].update({"body": VALID, **pull_request})
+        return run_cli(event, *arguments)
+
+    def test_drafts_skip_admission(self) -> None:
+        event = owner_event(author_association="NONE", author_id=2, sender_id=2)
+        event["pull_request"]["draft"] = True
+        self.assertEqual(run_cli(event).returncode, 0)  # empty body: checked once it's ready for review
+
+    def test_outside_contributions_target_the_default_branch(self) -> None:
+        self.assertEqual(self.run_with().returncode, 0)
+        result = self.run_with(base_ref="release/1.x")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("REFUSE_BASE_BRANCH", result.stdout)
+        self.assertEqual(self.run_with("COLLABORATOR", base_ref="release/1.x").returncode, 0)
+
+    def test_size_limits_count_lines_and_files_and_zero_turns_them_off(self) -> None:
+        self.assertEqual(self.run_with(additions=4000, deletions=1000, changed_files=300).returncode, 0)
+        for size in ({"additions": 4000, "deletions": 1001}, {"changed_files": 301}):
+            result = self.run_with(**size)
+            self.assertEqual(result.returncode, 1, size)
+            self.assertIn("REFUSE_TOO_LARGE", result.stdout)
+        self.assertEqual(self.run_with("NONE", "--max-changed-lines", "0", additions=9999).returncode, 0)
+        self.assertEqual(self.run_with("COLLABORATOR", additions=9999).returncode, 0)
+
+
 class ConfigureRepositoryTests(unittest.TestCase):
     def test_workflows_get_read_only_tokens_and_cannot_approve(self) -> None:
         calls = {endpoint: payload for _, endpoint, payload in baseline("o/r")}

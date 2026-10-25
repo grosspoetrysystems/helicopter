@@ -1,0 +1,5 @@
+kind: Action required
+body: Admission skips draft pull requests until they're marked ready for review, and refuses outside contributors' pull requests that target a branch other than the default (REFUSE_BASE_BRANCH) or change more than 5,000 lines or 300 files (REFUSE_TOO_LARGE).
+time: 2026-10-26T00:43:25.530663+01:00
+custom:
+    Action: Do outside contributors target another branch? Change validate_shape in scripts/validate_pr.py. Set HELICOPTER_MAX_CHANGED_LINES or HELICOPTER_MAX_CHANGED_FILES to change the size limits (0 turns one off).
