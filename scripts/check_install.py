@@ -100,6 +100,7 @@ def workflow_problems(name: str, text: str) -> list[str]:
     if not any(re.search(rf"\b{trigger}\b", on_text) for trigger in PRIVILEGED_TRIGGERS):
         return problems
 
+    base_checkout = re.search(r"\bpull_request_target\b", on_text) is not None
     for number, line in enumerate(lines, 1):
         if PR_HEAD.search(line):
             problems.append(f"{name}:{number}: privileged workflow references the pull request head")
@@ -109,8 +110,12 @@ def workflow_problems(name: str, text: str) -> list[str]:
                 if re.match(r"^\s*-\s", following):
                     break
                 step.append(following.strip())
-            if TRUSTED_REF not in step:
-                problems.append(f"{name}:{number}: privileged checkout must set `{TRUSTED_REF}`")
+            # Without a ref, GitHub checks out the default branch for workflow_run and issue_comment (and the
+            # operator's chosen ref for workflow_dispatch), but the pull request's base branch for pull_request_target.
+            bare = not any(item.startswith("ref:") for item in step) and not base_checkout
+            if TRUSTED_REF not in step and not bare:
+                problems.append(f"{name}:{number}: privileged checkout must set `{TRUSTED_REF}`"
+                                + ("" if base_checkout else " or no ref"))
     return problems
 
 

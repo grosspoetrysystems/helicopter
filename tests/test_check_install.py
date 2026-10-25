@@ -44,6 +44,13 @@ class WorkflowInvariants(unittest.TestCase):
         problems = workflow_problems("w.yml", workflow("pull_request_target", steps))
         self.assertTrue(any("privileged checkout" in p for p in problems))
 
+    def test_bare_checkout_passes_only_where_github_picks_the_default_branch(self):
+        bare = f"      - uses: actions/checkout@{SHA}\n        with:\n          persist-credentials: false\n"
+        self.assertEqual(workflow_problems("w.yml", workflow("workflow_run", bare)), [])
+        self.assertEqual(workflow_problems("w.yml", workflow("issue_comment", bare)), [])
+        other_ref = f"      - uses: actions/checkout@{SHA}\n        with:\n          ref: ${{{{ github.event.workflow_run.head_branch }}}}\n"
+        self.assertTrue(workflow_problems("w.yml", workflow("workflow_run", other_ref)))
+
     def test_privileged_reference_to_pr_head_fails(self):
         steps = TRUSTED_CHECKOUT + "      - run: git fetch origin ${{ github.event.pull_request.head.sha }}\n"
         problems = workflow_problems("w.yml", workflow("issue_comment", steps))
