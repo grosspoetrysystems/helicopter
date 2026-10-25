@@ -161,6 +161,40 @@ def validate_open_prs(open_prs: int, limit: int) -> list[Refusal]:
     ]
 
 
+def validate_shape(pull_request: dict[str, Any], default_branch: str, max_lines: int, max_files: int) -> list[Refusal]:
+    """Outside contributions target the default branch and stay small enough to review. A limit of 0 is off."""
+    refusals = []
+    base = (pull_request.get("base") or {}).get("ref")
+    if default_branch and base and base != default_branch:
+        refusals.append(
+            Refusal(
+                "REFUSE_BASE_BRANCH",
+                f"This pull request targets `{base}`; contributions go to `{default_branch}`. "
+                "Change the base branch with **Edit** next to the title.",
+            )
+        )
+    lines = (pull_request.get("additions") or 0) + (pull_request.get("deletions") or 0)
+    files = pull_request.get("changed_files") or 0
+    over = []
+    if max_lines and lines > max_lines:
+        over.append(f"{lines} changed lines (limit {max_lines})")
+    if max_files and files > max_files:
+        over.append(f"{files} changed files (limit {max_files})")
+    if over:
+        refusals.append(
+            Refusal(
+                "REFUSE_TOO_LARGE",
+                f"This pull request has {' and '.join(over)}. Split it into smaller pull requests, "
+                "or ask a maintainer in an issue first.",
+            )
+        )
+    return refusals
+
+
+def _limit(value: str, default: int) -> int:
+    return int(value) if re.fullmatch(r"[0-9]+", value) else default
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("event", type=Path, help="GitHub pull request event JSON")
@@ -195,6 +229,8 @@ def main() -> int:
         default="2",
         help="most open non-draft pull requests an outside contributor may have; 0 disables",
     )
+    parser.add_argument("--max-changed-lines", default="5000", help="outside contributors' size limit; 0 disables")
+    parser.add_argument("--max-changed-files", default="300", help="outside contributors' file limit; 0 disables")
     args = parser.parse_args()
 
     try:
@@ -202,6 +238,10 @@ def main() -> int:
     except (OSError, json.JSONDecodeError) as error:
         print(f"REFUSE_EVENT_INVALID: {error}")
         return 2
+
+    if (event.get("pull_request") or {}).get("draft"):
+        print("Draft: admission runs when the pull request is marked ready for review.")
+        return 0
 
     if re.fullmatch(r"[1-9][0-9]*", args.solo_maintainer_id):
         solo_maintainer_id = int(args.solo_maintainer_id)
@@ -234,8 +274,11 @@ def main() -> int:
             return 2
         refusals += validate_signoff(commits)
     if pull_request.get("author_association") not in {"OWNER", "MEMBER", "COLLABORATOR"}:
-        limit = int(args.open_pr_limit) if re.fullmatch(r"[0-9]+", args.open_pr_limit) else 2
-        refusals += validate_open_prs(args.open_prs, limit)
+        refusals += validate_open_prs(args.open_prs, _limit(args.open_pr_limit, 2))
+        default_branch = (event.get("repository") or {}).get("default_branch") or ""
+        refusals += validate_shape(
+            pull_request, default_branch, _limit(args.max_changed_lines, 5000), _limit(args.max_changed_files, 300)
+        )
     if refusals:
         print("Contribution intake refused:")
         for refusal in refusals:

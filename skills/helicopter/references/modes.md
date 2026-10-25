@@ -62,7 +62,7 @@ Sound defaults for any repository, with or without agents. The configurator appl
 
 **Authorized automation.** Bots listed in `HELICOPTER_AUTOMATION_LOGINS` pass admission on branches of this repository without the pull request template; human review still applies. The queue treats their pull requests like the maintainer's own: skipped in `solo` and `contributor` modes, queued in `team` mode. The configurator sets it to `dependabot[bot]` when it's unset; if you already set it, add `dependabot[bot]` yourself.
 
-**Admission settings.** `HELICOPTER_SIGNOFF` (default `dco`; `off` for projects using a CLA) controls the sign-off check. `HELICOPTER_OPEN_PR_LIMIT` (default 2; `0` turns it off) caps open non-draft pull requests for contributors without write access.
+**Admission settings.** `HELICOPTER_SIGNOFF` (default `dco`; `off` for projects using a CLA) controls the sign-off check. `HELICOPTER_OPEN_PR_LIMIT` (default 2; `0` turns it off) caps open non-draft pull requests for contributors without write access. `HELICOPTER_MAX_CHANGED_LINES` (default 5000) and `HELICOPTER_MAX_CHANGED_FILES` (default 300; `0` turns either off) cap their size, and their pull requests must target the default branch. Drafts skip admission until they're marked ready for review.
 
 ## Trust decisions
 

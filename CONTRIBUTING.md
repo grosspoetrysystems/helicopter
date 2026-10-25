@@ -10,6 +10,8 @@ Helicopter welcomes useful, reviewable work, whether or not a tool helped write 
 | Every commit carries `Signed-off-by` with its author's email ([DCO](#legal)); merge commits are skipped | `validate-metadata` | `REFUSE_SIGNOFF_MISSING` |
 | A bot can open pull requests only when a maintainer has listed it in `HELICOPTER_AUTOMATION_LOGINS` | `validate-metadata` | `REFUSE_BOT_UNAUTHORIZED` |
 | Contributors without write access have at most two open non-draft pull requests (drafts don't count) | `validate-metadata` | `REFUSE_OPEN_PR_LIMIT` |
+| Contributors without write access target the default branch | `validate-metadata` | `REFUSE_BASE_BRANCH` |
+| Contributors without write access change at most 5,000 lines and 300 files per pull request | `validate-metadata` | `REFUSE_TOO_LARGE` |
 | Merging needs the required checks to pass and the reviews your mode requires; nobody can force-push or delete the default branch | Branch protection set by `configure_repository.py` | — |
 | Changes to workflows, security, dependencies, release machinery, policy, or agent instructions need the owners in `.github/CODEOWNERS` (contributor and team modes) | Branch protection (code-owner review) | — |
 | Helicopter reruns its own checks; your report of what you ran is context, not evidence | Project CI | — |
@@ -18,7 +20,7 @@ Each refusal says how to fix it. After fixing, push or edit the description to r
 
 ## Working with us
 
-Use a draft pull request while work is incomplete. When you've addressed review, push your changes and reply, or press **Re-request review**. Either one hands the pull request back to a maintainer. Labels show whose turn it is: `queue:awaiting-author` is yours, `queue:awaiting-reviewer` is ours. An automated review may comment on your change first; it's advisory and can't approve.
+Use a draft pull request while work is incomplete; the checks above wait until you mark it ready for review. When you've addressed review, push your changes and reply, or press **Re-request review**. Either one hands the pull request back to a maintainer. Labels show whose turn it is: `queue:awaiting-author` is yours, `queue:awaiting-reviewer` is ours. An automated review may comment on your change first; it's advisory and can't approve.
 
 ## Guidance
 

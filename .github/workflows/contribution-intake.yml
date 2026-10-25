@@ -56,6 +56,8 @@ jobs:
           HELICOPTER_AUTOMATION_LOGINS: ${{ vars.HELICOPTER_AUTOMATION_LOGINS }}
           HELICOPTER_SIGNOFF: ${{ vars.HELICOPTER_SIGNOFF || 'dco' }}
           HELICOPTER_OPEN_PR_LIMIT: ${{ vars.HELICOPTER_OPEN_PR_LIMIT || '2' }}
+          HELICOPTER_MAX_CHANGED_LINES: ${{ vars.HELICOPTER_MAX_CHANGED_LINES || '5000' }}
+          HELICOPTER_MAX_CHANGED_FILES: ${{ vars.HELICOPTER_MAX_CHANGED_FILES || '300' }}
         run: |
           commits=()
           if [ "$HELICOPTER_SIGNOFF" != off ]; then commits=(--commits "$RUNNER_TEMP/commits.json"); fi
@@ -65,7 +67,9 @@ jobs:
             --automation-logins "$HELICOPTER_AUTOMATION_LOGINS" \
             "${commits[@]}" \
             --open-prs "$(cat "$RUNNER_TEMP/open_prs")" \
-            --open-pr-limit "$HELICOPTER_OPEN_PR_LIMIT"
+            --open-pr-limit "$HELICOPTER_OPEN_PR_LIMIT" \
+            --max-changed-lines "$HELICOPTER_MAX_CHANGED_LINES" \
+            --max-changed-files "$HELICOPTER_MAX_CHANGED_FILES"
 
       # Security invariant: no job in this privileged workflow checks out or
       # executes the pull request head. Project builds/tests belong in a separate
