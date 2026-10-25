@@ -1,3 +1,0 @@
-kind: Fixed
-body: configure_repository.py keeps the status checks a branch already requires instead of replacing the list, so re-running it no longer drops your own CI or DCO checks.
-time: 2026-10-25T01:09:42.914674+02:00
