@@ -29,7 +29,7 @@ Most settings failures are fixed by running `python3 scripts/configure_repositor
 | Line | Checks | Fix |
 | --- | --- | --- |
 | admission workflow | A workflow runs `validate_pr.py` on `pull_request_target`, under any file name | Restore `contribution-intake.yml`. |
-| workflow trust boundary | Every action is pinned to a commit SHA or image digest; workflows on privileged triggers never reference or check out pull request code | Pin the action, or check out `${{ github.event.repository.default_branch }}`. |
+| workflow trust boundary | Every action is pinned to a commit SHA or image digest; workflows on privileged triggers never reference or check out pull request code | Pin the action, or check out `${{ github.event.repository.default_branch }}`. On `workflow_run` and `issue_comment`, a checkout with no ref also passes: GitHub checks out the default branch. |
 | your own owners and contacts | CODEOWNERS, SECURITY.md, and the issue-template contact link name your project, not Helicopter | Replace them. |
 | no Helicopter-only files | None of Helicopter's development tooling, README, or install guides | Delete the listed files. |
 | Helicopter version marker | `.github/helicopter/version.json` names the release you installed | Install or update with the `helicopter` skill. |
