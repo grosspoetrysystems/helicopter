@@ -29,21 +29,23 @@ PR_HEAD = re.compile(r"head\.sha|head\.ref|head_ref|refs/pull/|merge_commit_sha"
 CHECKOUT = re.compile(r"uses:\s*actions/checkout@")
 TRUSTED_REF = "ref: ${{ github.event.repository.default_branch }}"
 
-# Helicopter's own files: its development tooling, README, and install guides. Releases leave them out,
-# so the install never copies them; an adopter's copy shouldn't have them.
+# Helicopter's own files: its development tooling, README, and the helicopter skill (whose references replace
+# the guides older releases shipped). Releases leave them out; an adopter's copy shouldn't have them.
 NOT_SHIPPED = (
     ".changes/",
     "AGENTS.md",
     "CHANGELOG.md",
     "README.md",
     "assets/helicopter-header.webp",
+    "MAINTAINERS.md",
+    "docs/maintainer-modes.md",
     "docs/start-new-repository.md",
     "docs/add-to-existing-repository.md",
     "lefthook.yml",
     ".changie.yaml",
     "scripts/dev_checks.py",
     "scripts/release_manifest.py",
-    "skills/install-helicopter/",
+    "skills/helicopter/",
     "tests/test_dev_checks.py",
     "tests/test_release_manifest.py",
     "tests/test_stage.py",
@@ -58,6 +60,8 @@ DEV_MARKERS = {
     "AGENTS.md": "# Working on Helicopter",
     "CHANGELOG.md": "HELICOPTER_",
     "README.md": "helicopter-header.webp",
+    "MAINTAINERS.md": "# Maintaining and adopting Helicopter",
+    "docs/maintainer-modes.md": "Helicopter separates trusted project work",
     "docs/start-new-repository.md": HELICOPTER,
     "docs/add-to-existing-repository.md": HELICOPTER,
     "lefthook.yml": "dev_checks.py",
@@ -271,7 +275,7 @@ def file_findings(root: Path, repository: str) -> list[Finding]:
         findings.append(Finding("PASS", f"Helicopter version marker ({version})"))
     except (OSError, ValueError, KeyError, TypeError):
         findings.append(Finding("FAIL", "Helicopter version marker",
-                                f"no valid {VERSION_MARKER}; install or update with the install-helicopter skill so updates know their base"))
+                                f"no valid {VERSION_MARKER}; install or update with the helicopter skill so updates know their base"))
     findings.append(Finding("PASS", "Helicopter license notice") if (root / INSTALL_PATHS["LICENSE"]).is_file() else
                     Finding("FAIL", "Helicopter license notice", f"copy Helicopter's MIT LICENSE to {INSTALL_PATHS['LICENSE']}"))
     return findings

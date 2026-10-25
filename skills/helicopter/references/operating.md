@@ -1,19 +1,8 @@
-# Maintaining and adopting Helicopter
+# Operating Helicopter
 
-Helicopter's files express policy; GitHub settings enforce it. This guide covers this repository and projects that adopt its policy pack.
+Helicopter's files express policy; GitHub settings enforce it. Load this for settings, permissions, the review ramp, hoppers, and incident response.
 
-## Activate the repository
-
-- [ ] When adopting Helicopter, replace its name, URLs, contacts, and CODEOWNERS with the target project's values.
-- [ ] Confirm DCO is the intended legal mechanism. Admission checks every commit's sign-off; for a CLA instead, set the `HELICOPTER_SIGNOFF` repository variable to `off` and add the CLA check.
-- [ ] Decide which bot or GitHub App identities, if any, may open pull requests or otherwise interact with the repository. Admission refuses pull requests from bots not listed in the `HELICOPTER_AUTOMATION_LOGINS` repository variable. Also list automation that has collaborator access (for example an AI reviewer account) so its comments do not count as maintainer responses.
-- [ ] Set the open pull request limit for contributors without write access with the `HELICOPTER_OPEN_PR_LIMIT` repository variable (default 2; `0` turns it off), and review the issue-first guidance in `CONTRIBUTING.md`.
-- [ ] Create or replace the `needs-triage` and `automation-review` labels used by the issue forms.
-- [ ] Test the pull request template and both acceptance/refusal paths of the intake workflow.
-- [ ] Optionally add a `HELICOPTER_REVIEW_KEY` secret (an OpenRouter key with a credit limit) to turn on the first review (see [Review ramp](#review-ramp)). An organization secret shared with selected repositories gives one key and one limit across projects.
-- [ ] Choose `solo`, `contributor`, or `team` in [maintainer operating modes](docs/maintainer-modes.md), then run the repository configurator after its acceptance and refusal checks pass.
-- [ ] Publish reachable private security and conduct contacts.
-- [ ] Run `python3 scripts/check_install.py` from the repository's checkout. Every line should read `PASS`; each failure names its fix. Run it again whenever you suspect settings drifted.
+Contents: [GitHub settings](#github-settings), [Protect the policy plane](#protect-the-policy-plane), [Intake order](#intake-order), [Review ramp](#review-ramp), [Risk and response](#risk-and-response), [Tune from evidence](#tune-from-evidence).
 
 ## GitHub settings
 
@@ -26,7 +15,7 @@ All modes:
 - block force pushes and branch deletion; and
 - retain administrator bypass for emergency recovery.
 
-`solo` requires zero approvals because no second reviewer exists. `contributor` and `team` require one approval and CODEOWNER review; `team` also requires approval after the latest push. See [maintainer operating modes](docs/maintainer-modes.md) for the trust and transition rules.
+`solo` requires zero approvals because no second reviewer exists. `contributor` and `team` require one approval and CODEOWNER review; `team` also requires approval after the latest push. See [maintainer operating modes](modes.md) for the trust and transition rules.
 
 For public repositories, set the concurrent non-draft PR limit for users without write access. Start at two unless maintainer capacity supports more; add trusted contributors to the bypass list deliberately.
 
@@ -82,7 +71,7 @@ Admission's refusal and PR-Agent's review are the only automated responses on a 
 
 - After `HELICOPTER_QUEUE_NUDGE_HOURS` (default 168, seven days), one comment mentions the requested reviewers.
 - After `HELICOPTER_QUEUE_PAUSE_HOURS` (default 504, 21 days), the pull request is labelled `queue:no-capacity` and the contributor is told publicly. It stays open.
-- Drafts are not queued. Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) are queued only in `team` mode; see [Busy internal teams](docs/maintainer-modes.md#busy-internal-teams).
+- Drafts are not queued. Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) and from bots in `HELICOPTER_AUTOMATION_LOGINS` are queued only in `team` mode; see [Busy internal teams](modes.md#busy-internal-teams). Contributors' view of the labels is in [The review queue](queue.md).
 - When another pull request that references the same issue merges while this one waits, the pull request is labelled `queue:possibly-superseded` and gets one comment naming it. Nothing closes automatically and the turn doesn't change; close them in a batch from the hopper below, or remove the label to dismiss it. On oh-my-pi this flagged 16 of 51 superseded closures and none of 60 merged pull requests.
 
 `contribution-queue.yml` reconciles every hour and on pull request comments, so hour thresholds mean something. Maintainer reviews on fork pull requests are picked up by the next sweep. On a private repository each sweep uses a few Actions minutes; lower the cron frequency if day thresholds are enough.
