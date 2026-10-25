@@ -13,7 +13,7 @@ Helicopter's files are copied into a repository and then belong to it, so instal
 
 ## Start here
 
-From the repository root, on a clean working tree:
+From the repository root (the script refuses to write into a working tree with uncommitted changes, so every change can be undone with git):
 
 ```sh
 python3 scripts/stage.py --target . --dry-run
@@ -91,6 +91,6 @@ Load only the one the task needs:
 
 ## Scripts
 
-- `scripts/stage.py [--target .] [--version vX.Y.Z] [--base vX.Y.Z] [--dry-run]` (this skill): installs or updates from a verified release. JSON plan on stdout; exits 1 when it refuses (release older than v0.2.0, or an archive that doesn't match its manifest) and writes nothing in that case. Safe to run again.
+- `scripts/stage.py [--target .] [--version vX.Y.Z] [--base vX.Y.Z] [--dry-run]` (this skill): installs or updates from a verified release. JSON plan on stdout; exits 1 when it refuses (release older than v0.2.0, an archive that doesn't match its manifest, or uncommitted changes) and writes nothing in that case. Safe to run again.
 - `scripts/check_install.py [--repo OWNER/REPO]` (the repository): read-only setup check; exits 1 on any failure.
 - `scripts/configure_repository.py MODE [--dry-run] [--extra-check NAME]` (the repository): applies branch protection, mode variables, labels, and the baseline. Administrator only.

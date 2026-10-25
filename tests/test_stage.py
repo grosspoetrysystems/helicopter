@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -162,6 +163,15 @@ class UpdateTests(unittest.TestCase):
         older = {**BASE, "untouched.py": b"v0\n", "customized.md": b"something else entirely\n"}
         self.assertGreater(stage.match_score(BASE, self.repo.target), stage.match_score(older, self.repo.target))
         self.assertGreater(stage.match_score(BASE, self.repo.target), stage.match_score(NEW, self.repo.target))
+
+    def test_writes_need_a_clean_git_checkout(self):
+        self.assertIn("isn't a git repository", stage.dirty(self.repo.target))
+        subprocess.run(["git", "init", "-q", str(self.repo.target)], check=True)
+        self.assertIn("uncommitted changes", stage.dirty(self.repo.target))
+        subprocess.run(["git", "-C", str(self.repo.target), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(self.repo.target), "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false",
+                        "commit", "-qm", "base"], check=True)
+        self.assertIsNone(stage.dirty(self.repo.target))
 
     def test_release_notes_since_the_base(self):
         changelog = "# Changelog\n\n## v0.3.0 - x\n* three\n\n## v0.2.0 - x\n* two\n\n## v0.1.0 - x\n* one\n"

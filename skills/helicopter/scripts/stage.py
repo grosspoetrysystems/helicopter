@@ -6,7 +6,8 @@
     python3 scripts/stage.py --version v0.2.0 --base v0.1.0
 
 Prints a JSON plan on stdout; progress and errors go to stderr. Exit codes: 0 done (or nothing to do;
-check "conflict" in the plan), 1 refused (release too old, or the archive doesn't match its manifest),
+check "conflict" in the plan), 1 refused (release too old, an archive that doesn't match its manifest,
+or a working tree with uncommitted changes),
 2 bad arguments.
 
 Downloads the release manifest and the source archive at the manifest's commit, and checks every file
@@ -193,6 +194,16 @@ def stage(manifest: dict, files: dict[str, bytes], target: Path, staging: Path,
     return outcome
 
 
+def dirty(target: Path) -> str | None:
+    """Why the repository can't be written safely, or None: merges and removals must be undoable with git."""
+    status = subprocess.run(["git", "-C", str(target), "status", "--porcelain"], capture_output=True, text=True, check=False)
+    if status.returncode:
+        return f"{target} isn't a git repository; run from the repository's checkout. Nothing was written."
+    if status.stdout.strip():
+        return "The working tree has uncommitted changes; commit or stash them first, so the update can be undone. Nothing was written."
+    return None
+
+
 def notes_since(changelog: str, base: str, target: str) -> str:
     """The changelog sections after `base`, up to and including `target`."""
     sections = re.split(r"(?m)^(?=## v\d)", changelog)
@@ -249,6 +260,11 @@ def main() -> int:
         log(f"Already on Helicopter {base_manifest['version']}; nothing to do.")
         print(json.dumps({**plan, "mode": "current"}, indent=2))
         return 0
+
+    if not args.dry_run:
+        refusal = dirty(target)
+        if refusal:
+            raise SystemExit(refusal)
 
     log(f"Fetching Helicopter {release['version']} ({release['commit'][:7]}) and checking it against its manifest.")
     archive = fetch(f"https://github.com/{REPOSITORY}/archive/{release['commit']}.tar.gz")
