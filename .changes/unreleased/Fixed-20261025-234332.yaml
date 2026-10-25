@@ -1,3 +1,0 @@
-kind: Fixed
-body: check_install.py accepts a checkout with no ref in workflow_run and issue_comment workflows, where GitHub checks out the default branch anyway, so a deploy that can also be dispatched by hand keeps the operator's chosen ref. pull_request_target checkouts still have to name the default branch.
-time: 2026-10-25T23:43:32.662269+01:00

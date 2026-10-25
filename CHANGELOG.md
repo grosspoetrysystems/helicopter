@@ -5,6 +5,12 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.3.0 - 2026-10-25
+### Added
+* The hourly queue opens one issue when a newer Helicopter release is out than the one in .github/helicopter/version.json, linking its release notes and counting its Action required steps. Close the issue to skip that release.
+### Fixed
+* The helicopter skill's update no longer stops on GitHub's API rate limit when finding the installed release, and adds Helicopter's license under .github/helicopter/ for copies installed before the version marker.
+* check_install.py accepts a checkout with no ref in workflow_run and issue_comment workflows, where GitHub checks out the default branch anyway, so a deploy that can also be dispatched by hand keeps the operator's chosen ref. pull_request_target checkouts still have to name the default branch.
 ## v0.2.0 - 2026-10-25
 ### Added
 * scripts/check_install.py checks a repository's Helicopter setup without changing anything: mode, branch protection, token defaults, labels, release-tag ruleset, security baseline, workflow trust boundary, your own owners, and no leftover development tooling. Each failure names its fix.

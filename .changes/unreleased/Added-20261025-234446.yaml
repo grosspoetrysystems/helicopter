@@ -1,3 +1,0 @@
-kind: Added
-body: The hourly queue opens one issue when a newer Helicopter release is out than the one in .github/helicopter/version.json, linking its release notes and counting its Action required steps. Close the issue to skip that release.
-time: 2026-10-25T23:44:46.537116+01:00
