@@ -44,6 +44,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -250,7 +251,12 @@ def main() -> int:
         # rarely match byte for byte, so text similarity breaks the tie.
         scores = []
         for tag in release_tags():
-            candidate = manifest_of(tag)
+            try:
+                candidate = manifest_of(tag)
+            except urllib.error.HTTPError as error:
+                if error.code != 404:
+                    raise
+                continue  # tag without a published release (yet): nothing to compare against
             archive = fetch(f"https://github.com/{REPOSITORY}/archive/{candidate['commit']}.tar.gz")
             scores.append((match_score(release_files(candidate, archive), target), candidate))
         (exact, similar), base_manifest = max(scores, key=lambda pair: pair[0])
