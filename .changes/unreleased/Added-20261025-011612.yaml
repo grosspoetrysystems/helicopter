@@ -1,3 +1,3 @@
 kind: Added
-body: 'An install-helicopter agent skill installs from a release: it verifies every file against the release manifest, never overwrites your files, stages differing ones for merging, and records the version in .github/helicopter/version.json with Helicopter''s license beside it. check_install.py checks both.'
+body: 'A companion agent skill, helicopter (npx skills add grosspoetrysystems/helicopter), installs from a verified release or updates an installed copy: unchanged files are replaced, customized ones get a three-way merge, conflicts are left for review, and the release notes'' Action required steps become a task list in one pull request. It records the release in .github/helicopter/version.json with Helicopter''s license beside it; copies installed before the marker are matched to their release. check_install.py checks both.'
 time: 2026-10-25T01:16:12.679518+02:00

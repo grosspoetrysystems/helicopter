@@ -1,10 +1,6 @@
----
-type: Guide
-title: Maintainer operating modes
-description: Choose solo, contributor, or team mode, configure the repository, and see the baseline settings.
----
-
 # Maintainer operating modes
+
+Contents: [Busy internal teams](#busy-internal-teams), [Configure or change mode](#configure-or-change-mode), [Repository baseline](#repository-baseline), [Trust decisions](#trust-decisions), [Shared protection policy](#shared-protection-policy), [Trusted intake](#trusted-intake), [Direct pushes and releases](#direct-pushes-and-releases), [Stacked pull requests](#stacked-pull-requests), [References](#references).
 
 Helicopter separates trusted project work from external contribution intake. Choose one repository mode:
 
@@ -127,7 +123,7 @@ gh api repos/OWNER/REPOSITORY/rules/branches/BRANCH
 
 ## Trusted intake
 
-The intake workflow uses `pull_request_target` and loads its validator, review rules (`.pr_agent.toml`), and queue script from `github.event.repository.default_branch`. No job checks out or executes pull-request code; per-job permissions and the one optional secret are listed in [Protect the policy plane](../MAINTAINERS.md#protect-the-policy-plane). The mode variable is read at run time, but workflow changes must reach the protected default branch before the new behavior exists.
+The intake workflow uses `pull_request_target` and loads its validator, review rules (`.pr_agent.toml`), and queue script from `github.event.repository.default_branch`. No job checks out or executes pull-request code; per-job permissions and the one optional secret are listed in [Protect the policy plane](operating.md#protect-the-policy-plane). The mode variable is read at run time, but workflow changes must reach the protected default branch before the new behavior exists.
 
 The exemption returns success before parsing the pull-request body. It does not fill in or invent the Change, Verification, or Risk sections. Project builds and tests remain in an unprivileged `pull_request` workflow.
 

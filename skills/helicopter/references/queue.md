@@ -1,9 +1,3 @@
----
-type: Guide
-title: The review queue
-description: What each queue label on a pull request means, whose turn it is, and what to do next.
----
-
 # The review queue
 
 Every open pull request from an outside contributor carries one label saying whose turn it is. In `team` mode, members' pull requests are queued too. The queue recomputes the label from the pull request's timeline every hour and on every pull request event, so labels are outputs: setting one by hand is overwritten. The one exception is removing `queue:possibly-superseded`, which dismisses it.

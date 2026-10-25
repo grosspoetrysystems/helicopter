@@ -1,9 +1,3 @@
----
-type: Reference
-title: Install checker results
-description: What each line of scripts/check_install.py checks and how to fix a failure.
----
-
 # Install checker results
 
 Run `python3 scripts/check_install.py` from the repository's checkout. It changes nothing. Each line reads `PASS`, `FAIL` (with its fix), or `ADMIN` (your token can't read the setting; ask an administrator to run it). It exits 1 when any line fails.
@@ -38,6 +32,6 @@ Most settings failures are fixed by running `python3 scripts/configure_repositor
 | workflow trust boundary | Every action is pinned to a commit SHA or image digest; workflows on privileged triggers never reference or check out pull request code | Pin the action, or check out `${{ github.event.repository.default_branch }}`. |
 | your own owners and contacts | CODEOWNERS, SECURITY.md, and the issue-template contact link name your project, not Helicopter | Replace them. |
 | no Helicopter-only files | None of Helicopter's development tooling, README, or install guides | Delete the listed files. |
-| Helicopter version marker | `.github/helicopter/version.json` names the release you installed | Install or update with the `install-helicopter` skill. |
+| Helicopter version marker | `.github/helicopter/version.json` names the release you installed | Install or update with the `helicopter` skill. |
 | Helicopter license notice | `.github/helicopter/LICENSE` carries Helicopter's MIT license for the copied files | Copy it from the release. |
 | files | The checkout is the repository named by `--repo` | Run from that repository's checkout. |

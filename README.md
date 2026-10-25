@@ -68,33 +68,33 @@ Helicopter moderates behavior and evidence. It does not ask maintainers to guess
 - `scripts/validate_pr.py`: dependency-free validation with actionable refusal codes.
 - `scripts/pr_queue.py`: dependency-free queue.
 - `scripts/configure_repository.py` and `scripts/check_install.py`: apply the repository settings for a mode, and check them without changing anything.
-- `.github/CODEOWNERS` and `MAINTAINERS.md`: ownership and repository settings.
+- `.github/CODEOWNERS`: ownership of policy, automation, and agent instructions.
 - `SECURITY.md`, `CODE_OF_CONDUCT.md`, and focused issue forms.
-- `docs/`: modes, the review queue, and the install checker, as an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) bundle an agent can browse from `docs/index.md`.
-- `skills/install-helicopter/`: the install skill. It stays in Helicopter; installs record their release in `.github/helicopter/version.json`.
+- `.github/helicopter/`: the release the repository is on, and Helicopter's license for the copied files.
+
+Everything else lives in one companion agent skill, [`skills/helicopter`](skills/helicopter/SKILL.md), which stays in Helicopter: it installs, updates, checks, and explains the setup, with references on modes, the queue, operations, and the checker. Adopters don't carry or maintain copies of the guides.
 
 Add an agent framework, provenance database, transcript storage, or policy DSL only when a real workflow needs it.
 
-## Install with an agent
+## Install or update with an agent
 
 You need [Git](https://git-scm.com/downloads), Python 3.9 or newer, the [GitHub CLI](https://github.com/cli/cli#installation), and access to the target GitHub account:
 
 ```sh
 gh auth login --web
 gh auth status
+npx skills add grosspoetrysystems/helicopter   # add -g to install for every project
 ```
 
-Install Helicopter's [`install-helicopter` skill](skills/install-helicopter/SKILL.md) with your agent's skill installer, or point the agent at it. Then ask, in a new or existing repository:
+Any agent that reads [Agent Skills](https://agentskills.io) can also be pointed at [`skills/helicopter`](skills/helicopter/SKILL.md) directly. Then ask, in a new or existing repository:
 
 ```text
-Install Helicopter in this repository with the install-helicopter skill
-(https://github.com/grosspoetrysystems/helicopter/tree/main/skills/install-helicopter).
-Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
+Install Helicopter in this repository, or update it if it's behind. Maintainer mode: <SOLO|CONTRIBUTOR|TEAM>
 ```
 
-The skill installs the latest release, never `main`. It checks every file against the release manifest, never overwrites your files, merges where your files differ, and opens a pull request. Afterwards `python3 scripts/check_install.py` proves the setup; [Install checker results](docs/install-checker.md) explains each line. Repository settings, rulesets, and some security features need an administrator, and only change when you say so.
+The skill works from releases, never `main`. It checks every file against the release manifest and never overwrites your changes: unchanged files are replaced, customized ones get a three-way merge, and conflicts are left for review. An update becomes a task list and a few commits in one pull request, with every "Action required" step from the release notes listed for you. Afterwards `python3 scripts/check_install.py` proves the setup. Repository settings, rulesets, and some security features need an administrator, and only change when you say so.
 
-Choose [`solo`, `contributor`, or `team`](docs/maintainer-modes.md) for a sole maintainer, a maintainer-led contributor project, or an internal team that also accepts external contributions. To turn on the optional first review, bring your own model key: add a `HELICOPTER_REVIEW_KEY` secret, an OpenRouter key with a credit limit (see [Review ramp](MAINTAINERS.md#review-ramp)).
+Choose `solo`, `contributor`, or `team` for a sole maintainer, a maintainer-led contributor project, or an internal team that also accepts external contributions ([modes](skills/helicopter/references/modes.md)). To turn on the optional first review, bring your own model key: add a `HELICOPTER_REVIEW_KEY` secret, an OpenRouter key with a credit limit ([review ramp](skills/helicopter/references/operating.md#review-ramp)).
 
 ## Trust boundary
 
