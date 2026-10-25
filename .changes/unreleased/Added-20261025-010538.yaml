@@ -1,3 +1,0 @@
-kind: Added
-body: 'scripts/check_install.py checks a repository''s Helicopter setup without changing anything: mode, branch protection, token defaults, labels, release-tag ruleset, security baseline, workflow trust boundary, your own owners, and no leftover development tooling. Each failure names its fix.'
-time: 2026-10-25T01:05:38.345947+02:00
