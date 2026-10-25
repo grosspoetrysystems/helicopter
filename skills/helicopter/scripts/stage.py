@@ -94,6 +94,13 @@ def release_files(manifest: dict, archive: bytes) -> dict[str, bytes]:
     return found
 
 
+def release_tags() -> list[str]:
+    """Release tags from git itself: the GitHub API's unauthenticated limit (60 an hour per address) runs out."""
+    listing = subprocess.run(["git", "ls-remote", "--tags", "--refs", f"https://github.com/{REPOSITORY}.git", "v*"],
+                             capture_output=True, text=True, check=True).stdout
+    return [line.rsplit("/", 1)[1] for line in listing.splitlines() if numbers(line.rsplit("/", 1)[1])]
+
+
 def match_score(files: dict[str, bytes], target: Path) -> tuple[int, float]:
     """How closely the repository matches a release: (files identical, summed text similarity)."""
     exact, similar = 0, 0.0
@@ -150,6 +157,8 @@ def stage(manifest: dict, files: dict[str, bytes], target: Path, staging: Path,
         local = target / name
         ours = local.read_bytes() if local.is_file() else None
         old, new = base.get(path), files.get(path)
+        if path in INSTALL_PATHS and ours is None:
+            old = None  # installs before the marker kept it elsewhere (or not at all); the license notice must ship
         if new is None:
             if ours is not None and ours == old:
                 if write:
@@ -240,7 +249,7 @@ def main() -> int:
         # Installed before the version marker existed: the closest release is the base. Customized copies
         # rarely match byte for byte, so text similarity breaks the tie.
         scores = []
-        for tag in (r["tag_name"] for r in json.loads(fetch(f"https://api.github.com/repos/{REPOSITORY}/releases?per_page=100"))):
+        for tag in release_tags():
             candidate = manifest_of(tag)
             archive = fetch(f"https://github.com/{REPOSITORY}/archive/{candidate['commit']}.tar.gz")
             scores.append((match_score(release_files(candidate, archive), target), candidate))

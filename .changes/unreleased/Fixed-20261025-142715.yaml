@@ -1,0 +1,3 @@
+kind: Fixed
+body: The helicopter skill's update no longer stops on GitHub's API rate limit when finding the installed release, and adds Helicopter's license under .github/helicopter/ for copies installed before the version marker.
+time: 2026-10-25T14:27:15.59573+01:00

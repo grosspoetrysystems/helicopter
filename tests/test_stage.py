@@ -96,6 +96,7 @@ BASE = {
     "dropped.md": b"old guide\n",
     "dropped-customized.md": b"old guide\n",
     "same-upstream.txt": b"same\n",
+    "LICENSE": b"MIT\n",
 }
 NEW = {
     "untouched.py": b"v2\n",
@@ -103,6 +104,7 @@ NEW = {
     "clashing.md": b"two upstream\n",
     "deleted-here.yml": b"on: pull_request\n",
     "same-upstream.txt": b"same\n",
+    "LICENSE": b"MIT\n",
     "brand-new.py": b"new\n",
 }
 OURS = {
@@ -126,7 +128,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_each_file_takes_the_three_way_outcome(self):
         self.assertEqual(self.run_update(), {
-            "added": ["brand-new.py"],
+            "added": [".github/helicopter/LICENSE", "brand-new.py"],
             "updated": ["untouched.py"],
             "merged": ["customized.md"],
             "conflict": ["clashing.md"],
@@ -157,7 +159,7 @@ class UpdateTests(unittest.TestCase):
         self.run_update()
         (self.repo.target / "clashing.md").write_bytes(b"two upstream\n")
         again = stage.stage(manifest(NEW), NEW, self.repo.target, self.repo.staging, NEW)
-        self.assertEqual({k: v for k, v in again.items() if v}, {"unchanged": ["brand-new.py", "clashing.md", "same-upstream.txt", "untouched.py"]})
+        self.assertEqual({k: v for k, v in again.items() if v}, {"unchanged": [".github/helicopter/LICENSE", "brand-new.py", "clashing.md", "same-upstream.txt", "untouched.py"]})
 
     def test_base_detection_prefers_the_closest_release(self):
         older = {**BASE, "untouched.py": b"v0\n", "customized.md": b"something else entirely\n"}
