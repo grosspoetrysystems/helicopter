@@ -138,3 +138,15 @@ Helicopter favors controls maintainers can inspect and enforce: accountable peop
 ## License
 
 Helicopter is released under the [MIT License](LICENSE).
+
+## Documentation
+
+The corpus starts at [docs/index.md](docs/index.md). Check and build it locally with the pinned Poolboy release, then read the generated index:
+
+```sh
+npx --yes --package=@grosspoetrysystems/poolboy@0.3.0 -- poolboy check
+npx --yes --package=@grosspoetrysystems/poolboy@0.3.0 -- poolboy build
+npx --yes --package=@grosspoetrysystems/poolboy@0.3.0 -- poolboy read index.md
+```
+
+Main pushes validate the corpus; they do not deploy it automatically. After human content review and merge, an administrator can enable GitHub Pages at **Settings → Pages → GitHub Actions**, then manually run the Poolboy docs workflow on `main`.

@@ -20,13 +20,21 @@ from pathlib import Path
 
 from check_install import NOT_SHIPPED
 
+# Exclude repository docs here without flagging adopters' own Poolboy files in install checks.
+RELEASE_EXCLUDES = NOT_SHIPPED + (
+    "docs/",
+    ".poolboy/",
+    "poolboy.toml",
+    ".github/workflows/poolboy-docs.yml",
+)
+
 
 def git(*args: str) -> str:
     return subprocess.run(["git", *args], check=True, capture_output=True, text=True).stdout
 
 
 def shipped(paths: list[str]) -> list[str]:
-    return sorted(path for path in paths if not path.startswith(NOT_SHIPPED))
+    return sorted(path for path in paths if not path.startswith(RELEASE_EXCLUDES))
 
 
 def action_required(notes: str) -> int:
