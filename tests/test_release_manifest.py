@@ -29,6 +29,20 @@ class ManifestTests(unittest.TestCase):
         # Adopters' required check test-validator runs the shipped tests.
         self.assertEqual(shipped(files), [".github/workflows/contribution-queue.yml", "scripts/pr_queue.py", "tests/test_ramp.py", "tests/test_validate_pr.py"])
 
+    def test_poolboy_files_stay_out_of_release_but_adopter_policy_files_ship(self):
+        files = [
+            "docs/overview.md",
+            ".poolboy/generated.json",
+            "poolboy.toml",
+            ".github/workflows/poolboy-docs.yml",
+            ".github/workflows/contribution-policy-tests.yml",
+            "SECURITY.md",
+        ]
+        self.assertEqual(
+            shipped(files),
+            [".github/workflows/contribution-policy-tests.yml", "SECURITY.md"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
