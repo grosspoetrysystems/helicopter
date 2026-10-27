@@ -1,3 +1,0 @@
-kind: Changed
-body: Add upstream documentation and keep its Poolboy configuration, state, and publishing workflow out of adopter releases.
-time: 2026-10-26T15:15:32.045357+01:00
