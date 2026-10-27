@@ -5,6 +5,11 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.5.0 - 2026-10-27
+### Changed
+* Add upstream documentation and keep its Poolboy configuration, state, and publishing workflow out of adopter releases.
+### Fixed
+* The hourly queue no longer fails in repositories with issues turned off: the update notice is skipped there instead of stopping the sweep (since v0.3.0).
 ## v0.4.0 - 2026-10-26
 ### Action required
 * Admission skips draft pull requests until they're marked ready for review, and refuses outside contributors' pull requests that target a branch other than the default (REFUSE_BASE_BRANCH) or change more than 5,000 lines or 300 files (REFUSE_TOO_LARGE). (**Action:** Do outside contributors target another branch? Change validate_shape in scripts/validate_pr.py. Set HELICOPTER_MAX_CHANGED_LINES or HELICOPTER_MAX_CHANGED_FILES to change the size limits (0 turns one off).)
