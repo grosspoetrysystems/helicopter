@@ -5,6 +5,9 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.7.1 - 2026-10-28
+### Fixed
+* Updating never moves the helicopter-release pin back when Dependabot is already ahead of the release being installed, and check_install.py accepts a workflow step that uses the repository's root action (uses: ./).
 ## v0.7.0 - 2026-10-28
 ### Added
 * An optional Dependabot route for updates: installs and updates add .github/workflows/helicopter-release.yml, which pins Helicopter's new release-check action. When Helicopter releases, Dependabot opens a pull request bumping that pin (its own group, without the 7-day wait), and the check recommends running the helicopter skill on that branch. It never fails; delete the workflow to opt out. Copy the new dependabot.yml group so the bump isn't bundled with other actions.
