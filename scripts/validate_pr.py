@@ -15,7 +15,8 @@ REQUIRED_SECTIONS = ("Change", "Verification", "Risk")
 PLACEHOLDERS = (
     "Closes #",
     "Commands and results:",
-    "<commands and concise result; project CI verifies independently>",
+    "<commands and results; say what you couldn't run or test. Project CI verifies independently.>",
+    "<commands and concise result; project CI verifies independently>",  # earlier wording, still in open pull requests
     "Check every area this pull request changes:",
     "Details and mitigations:",
 )

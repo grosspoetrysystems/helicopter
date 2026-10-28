@@ -39,6 +39,7 @@ import difflib
 import hashlib
 import io
 import json
+import os
 import re
 import subprocess
 import sys
@@ -206,7 +207,9 @@ def stage(manifest: dict, files: dict[str, bytes], target: Path, staging: Path,
 
 def dirty(target: Path) -> str | None:
     """Why the repository can't be written safely, or None: merges and removals must be undoable with git."""
-    status = subprocess.run(["git", "-C", str(target), "status", "--porcelain"], capture_output=True, text=True, check=False)
+    # Ask about the target itself: a git hook's GIT_DIR or GIT_WORK_TREE would point at another checkout.
+    env = {key: value for key, value in os.environ.items() if key not in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE")}
+    status = subprocess.run(["git", "-C", str(target), "status", "--porcelain"], capture_output=True, text=True, check=False, env=env)
     if status.returncode:
         return f"{target} isn't a git repository; run from the repository's checkout. Nothing was written."
     if status.stdout.strip():

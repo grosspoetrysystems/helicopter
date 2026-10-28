@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import os
 import subprocess
 import sys
 import tarfile
@@ -34,6 +35,9 @@ def manifest(files: dict[str, bytes], version: str = "v0.2.0") -> dict:
 
 RELEASE = {"CONTRIBUTING.md": b"rules\n", "scripts/validate_pr.py": b"code\n", "LICENSE": b"MIT\n"}
 
+
+# A git hook exports GIT_DIR; without this, the fixture's git commands would act on the hook's repository.
+GIT_ENV = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
 
 class Repository:
     """A scratch target and staging directory, filled with `files`."""
@@ -168,11 +172,11 @@ class UpdateTests(unittest.TestCase):
 
     def test_writes_need_a_clean_git_checkout(self):
         self.assertIn("isn't a git repository", stage.dirty(self.repo.target))
-        subprocess.run(["git", "init", "-q", str(self.repo.target)], check=True)
+        subprocess.run(["git", "init", "-q", str(self.repo.target)], check=True, env=GIT_ENV)
         self.assertIn("uncommitted changes", stage.dirty(self.repo.target))
-        subprocess.run(["git", "-C", str(self.repo.target), "add", "-A"], check=True)
+        subprocess.run(["git", "-C", str(self.repo.target), "add", "-A"], check=True, env=GIT_ENV)
         subprocess.run(["git", "-C", str(self.repo.target), "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false",
-                        "commit", "-qm", "base"], check=True)
+                        "commit", "-qm", "base"], check=True, env=GIT_ENV)
         self.assertIsNone(stage.dirty(self.repo.target))
 
     def test_release_notes_since_the_base(self):

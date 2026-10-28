@@ -22,7 +22,7 @@ The template asks for:
 
 - **Change:** the problem, smallest solution, visible effect, and an optional
   issue-closing reference;
-- **Verification:** commands or steps run and their concise results; and
+- **Verification:** commands or steps run and their results, and what couldn't be run or tested; and
 - **Risk:** every changed risk area checked, or `None of the above`, with details
   and mitigations.
 
