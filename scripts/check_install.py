@@ -23,7 +23,7 @@ from configure_repository import MODES, QUEUE_LABELS, REQUIRED_CHECKS, TAG_RULES
 
 HELICOPTER = "grosspoetrysystems/helicopter"
 PRIVILEGED_TRIGGERS = ("pull_request_target", "workflow_run", "issue_comment")
-PINNED = re.compile(r"^(\./\S+|[\w.-]+/[\w./-]+@[0-9a-f]{40}|docker://\S+@sha256:[0-9a-f]{64})$")
+PINNED = re.compile(r"^(\./\S*|\$/\S*|[\w.-]+/[\w./-]+@[0-9a-f]{40}|docker://\S+@sha256:[0-9a-f]{64})$")
 USES = re.compile(r"^\s*(?:-\s+)?uses:\s*(\S+)")
 PR_HEAD = re.compile(r"head\.sha|head\.ref|head_ref|refs/pull/|merge_commit_sha")
 CHECKOUT = re.compile(r"uses:\s*actions/checkout@")

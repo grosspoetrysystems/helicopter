@@ -61,7 +61,7 @@ FIRST_SUPPORTED = (0, 2, 0)
 # bumps the pin when Helicopter releases, and the pinned action recommends running this skill on that pull request.
 RELEASE_CHECK = ".github/workflows/helicopter-release.yml"
 RELEASE_CHECK_SINCE = (0, 7, 0)  # the first release with action.yml
-RELEASE_PIN = re.compile(r"grosspoetrysystems/helicopter@[0-9a-f]{40} # v[0-9.]+")
+RELEASE_PIN = re.compile(r"grosspoetrysystems/helicopter@[0-9a-f]{40} # (v[0-9.]+)")
 # ponytail: the checkout pin here goes stale between skill updates; the repository's Dependabot bumps it after install.
 RELEASE_CHECK_WORKFLOW = """name: helicopter-release
 
@@ -183,6 +183,9 @@ def release_check(manifest: dict, target: Path, base_version: str | None, write:
     pin = f"grosspoetrysystems/helicopter@{manifest['commit']} # {manifest['version']}"
     if local.is_file():
         text = local.read_text()
+        current = RELEASE_PIN.search(text)
+        if current and numbers(current.group(1)) >= numbers(manifest["version"]):
+            return "unchanged"  # Dependabot is already there or ahead; never move the pin back
         pinned = RELEASE_PIN.sub(pin, text)
         if pinned == text:
             return "unchanged"
