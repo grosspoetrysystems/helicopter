@@ -5,6 +5,9 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.8.1 - 2026-10-28
+### Fixed
+* Use repository permissions to detect maintainers when GitHub reports CONTRIBUTOR for private organization members.
 ## v0.8.0 - 2026-10-28
 ### Added
 * Add advisory risk labels derived from changed paths, with an Actions summary comparing them with the author's Risk boxes.

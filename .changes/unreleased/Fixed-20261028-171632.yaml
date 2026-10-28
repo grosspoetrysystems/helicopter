@@ -1,3 +1,0 @@
-kind: Fixed
-body: Use repository permissions to detect maintainers when GitHub reports CONTRIBUTOR for private organization members.
-time: 2026-10-28T17:16:32.212198+01:00
