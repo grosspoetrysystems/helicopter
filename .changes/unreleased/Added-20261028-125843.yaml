@@ -1,3 +1,0 @@
-kind: Added
-body: 'An optional Dependabot route for updates: installs and updates add .github/workflows/helicopter-release.yml, which pins Helicopter''s new release-check action. When Helicopter releases, Dependabot opens a pull request bumping that pin (its own group, without the 7-day wait), and the check recommends running the helicopter skill on that branch. It never fails; delete the workflow to opt out. Copy the new dependabot.yml group so the bump isn''t bundled with other actions.'
-time: 2026-10-28T12:58:43.285864+01:00
