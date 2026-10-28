@@ -5,6 +5,9 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.8.0 - 2026-10-28
+### Added
+* Add advisory risk labels derived from changed paths, with an Actions summary comparing them with the author's Risk boxes.
 ## v0.7.1 - 2026-10-28
 ### Fixed
 * Updating never moves the helicopter-release pin back when Dependabot is already ahead of the release being installed, and check_install.py accepts a workflow step that uses the repository's root action (uses: ./).
