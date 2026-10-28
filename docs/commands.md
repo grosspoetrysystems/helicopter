@@ -24,7 +24,6 @@ substitute for human review.
 python3 scripts/validate_pr.py EVENT_JSON \
   --mode solo|contributor|team \
   --solo-maintainer-id ID \
-  --automation-logins LOGINS \
   --commits COMMITS_JSON \
   --open-prs N \
   --open-pr-limit N \
@@ -36,7 +35,7 @@ python3 scripts/validate_pr.py EVENT_JSON \
 `Signed-off-by` check; the workflow omits it when `HELICOPTER_SIGNOFF=off` for
 a CLA. The validator accepts drafts without admission until they are marked
 ready. For an external contributor it checks the required `Change`,
-`Verification`, and `Risk` sections, sign-off, authorized bot status, target
+`Verification`, and `Risk` sections, sign-off, bot pull requests from forks, target
 branch, open non-draft PR count, and changed-file/line limits. Exit 1 is a
 policy refusal; invalid event or commit JSON is an operational error (exit 2).
 

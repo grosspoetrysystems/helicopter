@@ -47,7 +47,7 @@ flowchart LR
     G -->|"Approved"| H["Human merge"]
 ```
 
-The validator checks that the required sections are filled in, that every commit is signed off by its author, that unlisted bots stay out, and that outside contributors stay within the open pull request limit. It does not decide whether a patch is correct or whether a claim is true.
+The validator checks that the required sections are filled in, that every commit is signed off by its author, that bots open pull requests only from branches of this repository, and that outside contributors stay within the open pull request limit. It does not decide whether a patch is correct or whether a claim is true.
 
 ## Who it considers
 

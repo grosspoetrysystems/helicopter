@@ -1,0 +1,5 @@
+kind: Action required
+body: 'Bot pull requests are authorized by GitHub permissions instead of a list: a bot that opens a pull request from a branch of this repository (which needs write access an administrator granted) skips admission and is queued like the maintainer''s own work; bot pull requests from forks are refused. HELICOPTER_AUTOMATION_LOGINS and the Automation authorization issue form are gone. Agents submit through a person''s account.'
+time: 2026-10-28T12:15:30.591738+01:00
+custom:
+    Action: 'Delete the HELICOPTER_AUTOMATION_LOGINS repository variable. Check which GitHub Apps have write access to the repository: each one''s pull requests now skip admission.'

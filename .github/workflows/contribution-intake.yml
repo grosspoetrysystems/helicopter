@@ -53,7 +53,6 @@ jobs:
       - name: Validate pull request metadata
         env:
           EVENT_PATH: ${{ github.event_path }}
-          HELICOPTER_AUTOMATION_LOGINS: ${{ vars.HELICOPTER_AUTOMATION_LOGINS }}
           HELICOPTER_SIGNOFF: ${{ vars.HELICOPTER_SIGNOFF || 'dco' }}
           HELICOPTER_OPEN_PR_LIMIT: ${{ vars.HELICOPTER_OPEN_PR_LIMIT || '2' }}
           HELICOPTER_MAX_CHANGED_LINES: ${{ vars.HELICOPTER_MAX_CHANGED_LINES || '5000' }}
@@ -64,7 +63,6 @@ jobs:
           python3 trusted-base/scripts/validate_pr.py "$EVENT_PATH" \
             --mode "$HELICOPTER_MODE" \
             --solo-maintainer-id "$HELICOPTER_SOLO_MAINTAINER_ID" \
-            --automation-logins "$HELICOPTER_AUTOMATION_LOGINS" \
             "${commits[@]}" \
             --open-prs "$(cat "$RUNNER_TEMP/open_prs")" \
             --open-pr-limit "$HELICOPTER_OPEN_PR_LIMIT" \
@@ -131,5 +129,4 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HELICOPTER_QUEUE_NUDGE_HOURS: ${{ vars.HELICOPTER_QUEUE_NUDGE_HOURS }}
           HELICOPTER_QUEUE_PAUSE_HOURS: ${{ vars.HELICOPTER_QUEUE_PAUSE_HOURS }}
-          HELICOPTER_AUTOMATION_LOGINS: ${{ vars.HELICOPTER_AUTOMATION_LOGINS }}
         run: python3 trusted-base/scripts/pr_queue.py --pr "$PR_NUMBER"

@@ -30,7 +30,7 @@ non-draft pull request:
 | `REFUSE_OPEN_PR_LIMIT` | Convert another non-draft PR to draft or close it, then edit the description to retry. |
 | `REFUSE_BASE_BRANCH` | Change the pull request base to the repository default branch. |
 | `REFUSE_TOO_LARGE` | Split the change or ask a maintainer in an issue before resubmitting. |
-| `REFUSE_BOT_UNAUTHORIZED` | Request maintainer authorization through the automation-authorization issue form. |
+| `REFUSE_BOT_UNAUTHORIZED` | Bots open pull requests from a branch of this repository, which needs write access; agents submit through a person's account. |
 | `REFUSE_EVENT_INVALID` | Repair the event or commits JSON; this is an operational input error. |
 
 The exact limits come from repository variables, with defaults of two open
