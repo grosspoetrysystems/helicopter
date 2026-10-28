@@ -9,7 +9,7 @@ Every open pull request from an outside contributor carries one label saying who
 | `queue:no-capacity` | Nobody's yet | A maintainer's turn lasted 21 days (`HELICOPTER_QUEUE_PAUSE_HOURS`). The pull request stays open and keeps its place; the comment says so publicly instead of leaving it silent. |
 | `queue:possibly-superseded` | Unchanged | Another pull request for the same issue merged while this one waited. One comment names it. A maintainer closes it, or removes the label to dismiss the notice for good. |
 
-Not queued: drafts, the maintainer's own pull requests outside `team` mode, and pull requests from bots listed in `HELICOPTER_AUTOMATION_LOGINS` (treated as the maintainer's own work).
+Not queued: drafts, the maintainer's own pull requests outside `team` mode, and pull requests from bots on branches of this repository (treated as the maintainer's own work).
 
 Once an hour, if `.github/helicopter/version.json` names an older release than Helicopter's latest, the queue opens one issue, "Helicopter VERSION is available". Close it to skip that release; it isn't reopened.
 

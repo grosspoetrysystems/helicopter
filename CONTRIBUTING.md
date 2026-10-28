@@ -8,7 +8,7 @@ Helicopter welcomes useful, reviewable work, whether or not a tool helped write 
 | --- | --- | --- |
 | The description has **Change**, **Verification**, and **Risk** sections, each filled in | `validate-metadata` (required check) | `REFUSE_TEMPLATE_INCOMPLETE`, `REFUSE_CHANGE_EMPTY`, `REFUSE_VERIFICATION_EMPTY`, `REFUSE_RISK_UNCHECKED` |
 | Every commit carries `Signed-off-by` with its author's email ([DCO](#legal)); merge commits are skipped | `validate-metadata` | `REFUSE_SIGNOFF_MISSING` |
-| A bot can open pull requests only when a maintainer has listed it in `HELICOPTER_AUTOMATION_LOGINS` | `validate-metadata` | `REFUSE_BOT_UNAUTHORIZED` |
+| A bot opens pull requests only from a branch of this repository, which needs write access an administrator grants | `validate-metadata` | `REFUSE_BOT_UNAUTHORIZED` |
 | Contributors without write access have at most two open non-draft pull requests (drafts don't count) | `validate-metadata` | `REFUSE_OPEN_PR_LIMIT` |
 | Contributors without write access target the default branch | `validate-metadata` | `REFUSE_BASE_BRANCH` |
 | Contributors without write access change at most 5,000 lines and 300 files per pull request | `validate-metadata` | `REFUSE_TOO_LARGE` |
@@ -32,7 +32,7 @@ No check enforces these; maintainers may still ask you to follow them.
 - Don't publish raw transcripts that may contain secrets, personal data, or restricted source material.
 - Don't post substantive answers as though they were the accountable person's judgment when a tool wrote them.
 - Maintainers moderate observable behavior and policy violations, not guesses that writing "looks AI-generated."
-- Operators of autonomous agents request authorization with the **Automation authorization** issue form before their agent opens issues, reviews, or comments; only pull requests from unlisted bots are refused automatically.
+- Autonomous agents submit through a person's account. That person signs off, verifies the change, and answers for it.
 
 Passing every check does not guarantee acceptance.
 

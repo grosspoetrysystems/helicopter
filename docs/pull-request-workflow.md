@@ -45,8 +45,8 @@ synchronize, reopen, ready-for-review, and conversion to draft. Its
 4. stops before any expensive step when admission refuses the pull request.
 
 A draft is reported as waiting until it is ready. Trusted maintainer paths and
-explicitly authorized automation may receive a metadata exemption, but human
-review still applies.
+bots on branches of this repository (which needs write access) receive a
+metadata exemption, but human review still applies.
 
 ## Optional first review
 

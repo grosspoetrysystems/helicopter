@@ -135,10 +135,6 @@ def configure(repository: str, mode: str, dry_run: bool = False, extra_checks: t
         run("variable", "delete", "HELICOPTER_SOLO_MAINTAINER_ID", "--repo", repository)
 
     run("variable", "set", "HELICOPTER_MODE", "--body", mode, "--repo", repository)
-    if "HELICOPTER_AUTOMATION_LOGINS" not in variables:
-        # Dependabot's pull requests pass admission as authorized automation. If you already
-        # set this variable, add dependabot[bot] to it yourself.
-        run("variable", "set", "HELICOPTER_AUTOMATION_LOGINS", "--body", "dependabot[bot]", "--repo", repository)
     for name, (color, description) in QUEUE_LABELS.items():
         run("label", "create", name, "--color", color, "--description", description, "--force", "--repo", repository)
 

@@ -22,7 +22,7 @@ A pull request earns the next, more expensive step only after the cheaper step
 passes:
 
 1. **Admission:** `validate-metadata` checks the pull request contract, bot
-   authorization, DCO sign-off when enabled, target branch, open-PR budget, and
+   pull requests from forks, DCO sign-off when enabled, target branch, open-PR budget, and
    size limits. It reports actionable refusal codes; it does not judge whether
    the patch is correct.
 2. **First review (optional):** after admission, `first-review` can run
@@ -69,7 +69,7 @@ Choose the mode that matches who maintains the repository:
 | `team` | Same-repository `OWNER`, `MEMBER`, or `COLLABORATOR` authors | One CODEOWNER approval after the latest push |
 
 An unset or invalid mode fails closed to `contributor`. External contributors,
-bots without authorization, and fork pull requests follow the full contribution
+bots on forks, and fork pull requests follow the full contribution
 path even in `solo` or `team` mode.
 
 Read `skills/helicopter/references/modes.md` when changing mode or interpreting
