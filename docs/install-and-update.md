@@ -71,6 +71,14 @@ repository's CI, security policy, and required check names. Resolve conflicts
 without dropping stronger controls, then run the checker and open the update
 pull request for review.
 
+Updates can also start from Dependabot. The install adds an optional
+`.github/workflows/helicopter-release.yml` that pins Helicopter's release-check
+action. When a release is out, Dependabot opens a pull request bumping that pin.
+Its check never fails; it recommends reading the release notes and running the
+skill on that branch, so the file changes join the same pull request. Close the
+pull request to skip the release, or delete the workflow to opt out. The hourly
+queue issue remains the faster notice where issues are enabled.
+
 The release manifest and the `.github/helicopter/version.json` marker the skill
 writes into the adopter's copy identify the copied release. The skill updates
 from releases rather than `main`; it does not commit, push, merge, change

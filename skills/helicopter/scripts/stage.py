@@ -57,6 +57,36 @@ INSTALL_PATHS = {"LICENSE": ".github/helicopter/LICENSE"}
 INSTALLED_SIGNS = ("scripts/validate_pr.py", "scripts/pr_queue.py")
 # Older releases still listed Helicopter's own README and install guides, and had no install checker.
 FIRST_SUPPORTED = (0, 2, 0)
+# Optional, generated rather than copied so Dependabot and the skill never merge-conflict over its pin: Dependabot
+# bumps the pin when Helicopter releases, and the pinned action recommends running this skill on that pull request.
+RELEASE_CHECK = ".github/workflows/helicopter-release.yml"
+RELEASE_CHECK_SINCE = (0, 7, 0)  # the first release with action.yml
+RELEASE_PIN = re.compile(r"grosspoetrysystems/helicopter@[0-9a-f]{40} # v[0-9.]+")
+# ponytail: the checkout pin here goes stale between skill updates; the repository's Dependabot bumps it after install.
+RELEASE_CHECK_WORKFLOW = """name: helicopter-release
+
+# Optional. When Helicopter releases, Dependabot bumps the pin below. This check then recommends running the
+# helicopter skill on that pull request to update Helicopter's files. It never fails. Delete this file to opt out.
+on:
+  pull_request:
+    paths:
+      - .github/workflows/helicopter-release.yml
+      - .github/helicopter/version.json
+
+permissions:
+  contents: read
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: .github/helicopter
+      - uses: PIN
+"""
 OUTCOMES = ("added", "updated", "merged", "conflict", "differs", "missing", "removed", "kept", "unchanged")
 
 
@@ -141,8 +171,34 @@ def patch(path: str, base: bytes, theirs: bytes) -> str:
     ))
 
 
+def release_check(manifest: dict, target: Path, base_version: str | None, write: bool) -> str | None:
+    """Point the optional release-check workflow at this release. Returns its outcome, or None if not handled.
+
+    It's created on install and on the first update to a release that has it. Absent after that means the
+    maintainer deleted it to opt out, so it isn't recreated.
+    """
+    if numbers(manifest["version"]) < RELEASE_CHECK_SINCE:
+        return None
+    local = target / RELEASE_CHECK
+    pin = f"grosspoetrysystems/helicopter@{manifest['commit']} # {manifest['version']}"
+    if local.is_file():
+        text = local.read_text()
+        pinned = RELEASE_PIN.sub(pin, text)
+        if pinned == text:
+            return "unchanged"
+        if write:
+            local.write_text(pinned)
+        return "updated"
+    if base_version and numbers(base_version) >= RELEASE_CHECK_SINCE:
+        return None
+    if write:
+        local.parent.mkdir(parents=True, exist_ok=True)
+        local.write_text(RELEASE_CHECK_WORKFLOW.replace("PIN", pin))
+    return "added"
+
+
 def stage(manifest: dict, files: dict[str, bytes], target: Path, staging: Path,
-          base: dict[str, bytes] | None = None, write: bool = True) -> dict[str, list[str]]:
+          base: dict[str, bytes] | None = None, write: bool = True, base_version: str | None = None) -> dict[str, list[str]]:
     """Bring the repository from `base` (empty for a new install) to `files`. Returns paths by outcome.
 
     With write=False nothing in `target` changes; staged copies and patches still go to `staging`.
@@ -197,6 +253,9 @@ def stage(manifest: dict, files: dict[str, bytes], target: Path, staging: Path,
                     local.write_bytes(merged[1])
                 outcome["conflict" if merged[0] else "merged"].append(name)
 
+    check = release_check(manifest, target, base_version, write)
+    if check:
+        outcome[check].append(RELEASE_CHECK)
     if not write:
         return outcome
     marker = target / VERSION_MARKER
@@ -289,7 +348,8 @@ def main() -> int:
     files = release_files(release, archive)
     base = release_files(base_manifest, fetch(f"https://github.com/{REPOSITORY}/archive/{base_manifest['commit']}.tar.gz")) if base_manifest else {}
     staging = Path(tempfile.mkdtemp(prefix=f"helicopter-{release['version']}-"))
-    outcome = stage(release, files, target, staging, base, write=not args.dry_run)
+    outcome = stage(release, files, target, staging, base, write=not args.dry_run,
+                    base_version=base_manifest["version"] if base_manifest else None)
 
     plan.update(staging=str(staging), files={kind: paths for kind, paths in outcome.items() if paths})
     if base_manifest:
