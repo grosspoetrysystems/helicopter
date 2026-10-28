@@ -21,6 +21,16 @@ jobs:
       - name: Workflow invariants
         run: python3 scripts/dev_checks.py workflows
 
+      # The release-check action adopters pin: it must run, and never fail, with the files behind or no marker.
+      - name: Release check fixture, files behind
+        run: |
+          mkdir -p .github/helicopter
+          printf '{"version": "v0.0.1"}\n' > .github/helicopter/version.json
+      - uses: ./ # zizmor: ignore[self-repository] actionlint doesn't accept the newer $/ form yet
+      - name: Release check fixture, no version marker
+        run: rm -r .github/helicopter
+      - uses: ./ # zizmor: ignore[self-repository] actionlint doesn't accept the newer $/ form yet
+
       # Dependabot's pin bumps don't need release notes; the release manifest's hashes still carry them.
       - name: Changelog fragment
         if: github.event.pull_request.user.login != 'dependabot[bot]'

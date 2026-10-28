@@ -145,6 +145,9 @@ class ReleaseCheckTests(unittest.TestCase):
         self.assertEqual(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.7.0", write=True), "updated")
         self.assertEqual(self.workflow.read_text(), bumped.replace("a" * 40 + " # v0.7.0", "b" * 40 + " # v0.8.0"))
         self.assertEqual(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.8.0", write=True), "unchanged")
+        before = self.workflow.read_text()  # Dependabot is ahead of the release being staged
+        self.assertEqual(stage.release_check(self.release("v0.7.5", "d"), self.target, "v0.7.0", write=True), "unchanged")
+        self.assertEqual(self.workflow.read_text(), before)
 
     def test_deleted_means_opted_out_and_old_releases_get_none(self):
         self.assertIsNone(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.7.0", write=True))

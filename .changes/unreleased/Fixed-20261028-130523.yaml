@@ -1,0 +1,3 @@
+kind: Fixed
+body: 'Updating never moves the helicopter-release pin back when Dependabot is already ahead of the release being installed, and check_install.py accepts a workflow step that uses the repository''s root action (uses: ./).'
+time: 2026-10-28T13:05:23.8887+01:00
