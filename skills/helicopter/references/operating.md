@@ -6,7 +6,7 @@ Contents: [GitHub settings](#github-settings), [Protect the policy plane](#prote
 
 ## GitHub settings
 
-Run `python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY` after the required checks have run successfully. The configurator protects the default branch, applies the selected mode, and creates the `queue:` labels. The queue fails rather than create a missing label. `python3 scripts/check_install.py` compares the live settings with the same definitions and changes nothing.
+Run `python3 scripts/configure_repository.py MODE --repo OWNER/REPOSITORY` after the required checks have run successfully. The configurator protects the default branch, applies the selected mode, and creates the `queue:` and advisory `risk:` labels. The queue fails rather than create a missing label; the risk-label job tolerates a missing label because GitHub creates it when first added. `python3 scripts/check_install.py` compares the live settings with the same definitions and changes nothing.
 
 All modes:
 
@@ -30,11 +30,12 @@ The intake and queue workflows use `pull_request_target`, `issue_comment`, and `
 1. only event metadata, the GitHub API, and protected default-branch files are read; the diff is read as text, never applied;
 2. the contributor head is never checked out, built, or executed;
 3. the only secret is the optional model key, held by `first-review`, which runs PR-Agent pinned by image digest; and
-4. write permission is job-scoped: `first-review` writes its review comment and labels, `queue` jobs write queue labels and notices and hold no secret. PR-Agent posts model text as written, so a prompt-injected diff can put mentions or links in its comment; the comment is advisory and moves nothing.
+4. write permission is job-scoped: `first-review` writes its review comment and labels, `risk-labels` writes only `risk:` labels and its job summary, and `queue` jobs write queue labels and notices and hold no secret. PR-Agent posts model text as written, so a prompt-injected diff can put mentions or links in its comment; all automated signals are advisory and move nothing.
 
 | Job | Token | Secret |
 | --- | --- | --- |
 | `validate-metadata` | `contents`, `pull-requests: read` | none |
+| `risk-labels` | `contents: read`; `issues`, `pull-requests: write` | none |
 | `first-review` | `contents: read`; `issues`, `pull-requests: write` | `HELICOPTER_REVIEW_KEY` |
 | `queue` (both workflows) | `contents`, `checks: read`; `issues`, `pull-requests: write` | none |
 
@@ -60,10 +61,19 @@ Each pull request earns the next, more expensive step by passing the cheaper one
 | Step | Cost | Output | Then |
 | --- | --- | --- | --- |
 | Admission (`validate-metadata`) | $0 | refusal codes, or pass | refused: contributor's turn |
+| Advisory risk labels (`risk-labels`) | $0 | path-derived `risk:` labels and a comparison in the Actions summary | maintainer judgement |
 | First review (`first-review`, optional) | a fraction of a cent with the default model | one PR-Agent comment: key issues, effort, tests, security, merge recommendation; `Review effort` and `possible security issue` labels | advisory: the contributor fixes what it found |
 | Queue | $0 | queue label, nudge, announced pause | human review and merge |
 
-Admission's refusal and PR-Agent's review are the only automated responses on a pull request; the queue adds a notice only when a maintainer is late.
+Admission's refusal is the only automated response that can stop the ramp. Risk labels and PR-Agent's review are advisory; the queue adds a notice only when a maintainer is late. No automated signal approves or merges.
+
+**Risk labels.** On every admitted pull request event, `risk-labels` reads paths
+from `pulls/N/files` and `.gitattributes` from the default branch. It labels
+dependency, automation, and generated/vendored paths and writes the path table
+beside the author's Risk boxes in the Actions summary. The comparison is a
+measurement record, not a refusal: authentication and other security-sensitive
+changes remain the author's responsibility, and incomplete file data never
+removes an existing risk label.
 
 **First review.** Runs only when the `HELICOPTER_REVIEW_KEY` secret exists, never on drafts, on opening and on every push, editing its one comment in place. `.pr_agent.toml` on the default branch holds the model (default `openrouter/deepseek/deepseek-v4.1-flash`), the cost rail (`custom_model_max_tokens`: larger pull requests are clipped to fit), the output sections, and the input rules in `extra_instructions`. Change the review by editing that file. Set a credit limit on the key with your provider. The review is advisory: it does not move the turn or block merging.
 

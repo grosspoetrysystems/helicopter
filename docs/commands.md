@@ -3,6 +3,7 @@ type: reference
 status: stable
 sources:
   - resource: scripts/validate_pr.py
+  - resource: scripts/risk_labels.py
   - resource: scripts/pr_queue.py
   - resource: scripts/configure_repository.py
   - resource: scripts/check_install.py
@@ -51,6 +52,20 @@ uses the GitHub API and `GITHUB_REPOSITORY`/`GITHUB_TOKEN`; it derives turn and
 clock state from the timeline, so labels are outputs rather than caller-supplied
 state.
 
+## Advisory risk labels
+
+```sh
+GITHUB_REPOSITORY=OWNER/REPOSITORY GITHUB_TOKEN=TOKEN \
+  python3 scripts/risk_labels.py --pr NUMBER [--dry-run]
+```
+
+The script reads changed paths from GitHub and `.gitattributes` from the trusted
+default branch, then sets the applicable `risk:` labels and removes stale
+`risk:` labels after a complete listing. `--dry-run` prints API writes instead
+of applying them. Missing or capped file data is unknown: existing risk labels
+are retained and the summary says the comparison may be incomplete. The
+workflow writes that summary to `GITHUB_STEP_SUMMARY`; a local run prints it.
+
 ## Repository configuration and checking
 
 ```sh
@@ -60,11 +75,12 @@ python3 scripts/check_install.py [--repo OWNER/REPOSITORY]
 ```
 
 `MODE` is `solo`, `contributor`, or `team`. The configurator applies branch
-protection, required checks, queue labels, mode variables, and the permitted
-security baseline; it needs an administrator and can print manual steps where
-GitHub does not permit automation. `--dry-run` makes it report changes without
-applying them. `--extra-check` is repeatable, but only require checks that run
-on every pull request. The checker is read-only and exits 1 for any failure.
+protection, required checks, queue and advisory risk labels, mode variables, and
+the permitted security baseline; it needs an administrator and can print manual
+steps where GitHub does not permit automation. `--dry-run` makes it report
+changes without applying them. `--extra-check` is repeatable, but only require
+checks that run on every pull request. The checker is read-only and exits 1 for
+any failure.
 
 Run the checker again after configuration. If the repository renamed
 `test-validator` or `validate-metadata`, do not run the configurator unchanged:

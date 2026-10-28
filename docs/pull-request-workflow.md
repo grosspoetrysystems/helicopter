@@ -8,6 +8,7 @@ sources:
   - resource: .github/workflows/contribution-policy-tests.yml
   - resource: scripts/validate_pr.py
   - resource: scripts/pr_queue.py
+  - resource: scripts/risk_labels.py
   - resource: skills/helicopter/references/operating.md
 ---
 # Pull request workflow
@@ -47,6 +48,21 @@ synchronize, reopen, ready-for-review, and conversion to draft. Its
 A draft is reported as waiting until it is ready. Trusted maintainer paths and
 bots on branches of this repository (which needs write access) receive a
 metadata exemption, but human review still applies.
+
+## Advisory risk labels
+
+After `validate-metadata` passes, the separate `risk-labels` job checks out only
+`scripts/` and `.gitattributes` from the protected default branch. It reads the
+changed-file list through the GitHub API, never checks out or executes the
+contributor head, and sets exactly the applicable `risk:` labels:
+`risk:dependencies`, `risk:automation`, and `risk:generated`. It removes stale
+`risk:` labels after a complete file listing, but retains them when GitHub's
+file data is missing or capped at 3,000 because unknown absence is not a
+negative finding. The job writes a small path-to-label table and the author's
+ticked Risk boxes to the Actions summary. It is advisory: it does not comment,
+refuse admission, or ask the author to change a box. Authentication and other
+security-sensitive changes remain the author's Risk box because paths cannot
+prove them.
 
 ## Optional first review
 

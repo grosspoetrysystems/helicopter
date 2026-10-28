@@ -28,10 +28,14 @@ passes:
 2. **First review (optional):** after admission, `first-review` can run
    PR-Agent with the repository's `HELICOPTER_REVIEW_KEY`. The review is
    advisory and reads the pull request through the API.
-3. **Queue:** `pr_queue.py` derives whose turn it is from the timeline and
+3. **Advisory risk labels:** after admission, `risk_labels.py` maps changed
+   paths to `risk:dependencies`, `risk:automation`, and `risk:generated`. It
+   updates only those labels and records them beside the author's Risk boxes in
+   the Actions job summary; it does not comment, refuse, or infer security risk.
+4. **Queue:** `pr_queue.py` derives whose turn it is from the timeline and
    emits labels, notices, nudges, and an honest pause when maintainers have not
    had capacity.
-4. **Human merge:** CODEOWNERS, independent project CI, branch protection, and
+5. **Human merge:** CODEOWNERS, independent project CI, branch protection, and
    the protected ruleset decide whether a human merges the change.
 
 A push starts the ramp again. A successful admission is not approval, and an
@@ -43,6 +47,9 @@ automated review is not a substitute for human review.
   pull request event JSON file.
 - `scripts/pr_queue.py` — stateless queue reconciliation through the GitHub API;
   labels and notices are outputs, never inputs.
+- `scripts/risk_labels.py` — derives advisory `risk:` labels from changed paths,
+  compares them with the author's Risk boxes in the Actions job summary, and
+  never changes admission or posts a comment.
 - `scripts/configure_repository.py` — applies a selected repository mode,
   branch protection, labels, and security baseline through GitHub's API.
 - `scripts/check_install.py` — read-only comparison of an adopting repository's
