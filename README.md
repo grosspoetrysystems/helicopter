@@ -150,3 +150,4 @@ npx --yes --package=@grosspoetrysystems/poolboy@0.3.0 -- poolboy read index.md
 ```
 
 Main pushes validate the corpus; they do not deploy it automatically. After human content review and merge, an administrator can enable GitHub Pages at **Settings → Pages → GitHub Actions**, then manually run the Poolboy docs workflow on `main`.
+
