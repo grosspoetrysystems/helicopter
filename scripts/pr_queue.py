@@ -57,8 +57,8 @@ def turn(
     pr: dict[str, Any],
     events: list[dict[str, Any]],
     now: datetime,
+    is_maintainer: Callable[[str], bool],
     admitted: bool | None = None,
-    is_maintainer: Callable[[str], bool] | None = None,
 ) -> Turn | None:
     """Return whose turn it is and since when, or None if the PR is not queued."""
     if pr.get("draft"):
@@ -92,7 +92,7 @@ def turn(
         elif login == author:
             if whose == "author":
                 whose, since, reason = "reviewer", at, "author replied"
-        elif is_maintainer and is_maintainer(login or ""):
+        elif is_maintainer(login or ""):
             if event.get("state") == "changes_requested":
                 whose, since, reason = "author", at, "maintainer requested changes"
             elif whose == "reviewer" or event.get("state") == "approved":
@@ -245,7 +245,7 @@ def admitted(github: GitHub, sha: str) -> bool | None:
 def reconcile(github: GitHub, pr: dict[str, Any], now: datetime, nudge_hours: int, pause_hours: int) -> None:
     number = pr["number"]
     events = github.request("GET", f"issues/{number}/timeline?per_page=100")
-    current = turn(pr, events, now, admitted(github, pr["head"]["sha"]), github.is_maintainer)
+    current = turn(pr, events, now, github.is_maintainer, admitted(github, pr["head"]["sha"]))
     have = {label["name"] for label in pr["labels"]} & set(LABELS.values())
     want, due = plan(current, now, nudge_hours, pause_hours) if current else (None, None)
 

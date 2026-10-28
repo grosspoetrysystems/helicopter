@@ -38,7 +38,7 @@ def commit(day):
 
 class TurnTests(unittest.TestCase):
     def assertTurn(self, events, whose, day, **kwargs):
-        current = turn(PR, events, NOW, is_maintainer=lambda login: login == "max", **kwargs)
+        current = turn(PR, events, NOW, lambda login: login == "max", **kwargs)
         self.assertEqual((current.whose, current.since), (whose, datetime.fromisoformat(at(day).replace("Z", "+00:00"))))
 
     def test_new_pull_request_waits_on_reviewer_from_opening(self):
@@ -74,16 +74,16 @@ class TurnTests(unittest.TestCase):
         self.assertTurn(events, "reviewer", 0)
 
     def test_refused_admission_is_the_authors_turn(self):
-        self.assertEqual(turn(PR, [], NOW, admitted=False).whose, "author")
+        self.assertEqual(turn(PR, [], NOW, lambda login: False, admitted=False).whose, "author")
 
     def test_drafts_are_not_queued_and_ready_restarts_clock(self):
-        self.assertIsNone(turn({**PR, "draft": True}, [], NOW))
+        self.assertIsNone(turn({**PR, "draft": True}, [], NOW, lambda login: False))
         self.assertTurn([{"event": "ready_for_review", "created_at": at(8)}], "reviewer", 8)
 
 
 class PlanTests(unittest.TestCase):
     def since(self, hours):
-        return turn(PR, [{"event": "ready_for_review", "created_at": (NOW - timedelta(hours=hours)).isoformat()}], NOW)
+        return turn(PR, [{"event": "ready_for_review", "created_at": (NOW - timedelta(hours=hours)).isoformat()}], NOW, lambda login: False)
 
     def test_thresholds_in_hours(self):
         self.assertEqual(plan(self.since(3), NOW, 4, 72), (QUEUE_LABELS["reviewer"], None))
@@ -96,7 +96,7 @@ class PlanTests(unittest.TestCase):
         self.assertEqual(plan(self.since(21 * 24), NOW, 168, 504), (QUEUE_LABELS["paused"], "pause"))
 
     def test_author_turn_never_nudges_or_pauses(self):
-        current = turn(PR, [review(0, "max", "changes_requested")], NOW, is_maintainer=lambda login: login == "max")
+        current = turn(PR, [review(0, "max", "changes_requested")], NOW, lambda login: login == "max")
         self.assertEqual(plan(current, NOW, 4, 72), (QUEUE_LABELS["author"], None))
 
     def test_notice_reports_hours_then_days(self):
