@@ -1,0 +1,3 @@
+kind: Changed
+body: The pull request template's Verification placeholder asks contributors to say what they couldn't run or test, so a reviewer sees the gaps alongside the results. Nothing new is enforced.
+time: 2026-10-28T12:17:23.884858+01:00

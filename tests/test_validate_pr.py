@@ -94,7 +94,7 @@ class ValidateBodyTests(unittest.TestCase):
         body = (
             TEMPLATE.read_text(encoding="utf-8")
             .replace("Closes #", "Fixes the queue label.\n\nCloses #12")
-            .replace("<commands and concise result; project CI verifies independently>", "unittest: 40 passed")
+            .replace("<commands and results; say what you couldn't run or test. Project CI verifies independently.>", "unittest: 40 passed")
             .replace("- [ ] None of the above", "- [x] None of the above")
         )
         self.assertEqual(codes(body), set())
