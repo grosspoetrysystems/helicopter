@@ -32,7 +32,7 @@ No check enforces these; maintainers may still ask you to follow them.
 - Don't publish raw transcripts that may contain secrets, personal data, or restricted source material.
 - Don't post substantive answers as though they were the accountable person's judgment when a tool wrote them.
 - Maintainers moderate observable behavior and policy violations, not guesses that writing "looks AI-generated."
-- Autonomous agents submit through a person's account. That person signs off, verifies the change, and answers for it.
+- Autonomous agents work through a person's account. That person signs off the agent's pull requests, verifies them, and answers for its issues, reviews, and comments too.
 
 Passing every check does not guarantee acceptance.
 
