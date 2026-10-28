@@ -8,7 +8,7 @@ Helicopter separates trusted project work from external contribution intake. Cho
 | --- | --- | --- | --- |
 | `solo` | One human owns or maintains the project | The configured immutable user ID, on a same-repository branch | Zero required approvals |
 | `contributor` | One or more maintainers primarily receive external contributions | None; every pull request follows the contribution contract | One CODEOWNER approval, given after the latest push |
-| `team` | An internal organization team builds in the open and also accepts external contributions | Same-repository authors GitHub identifies as `OWNER`, `MEMBER`, or `COLLABORATOR` | One CODEOWNER approval after the latest push; administrators included |
+| `team` | An internal organization team builds in the open and also accepts external contributions | Same-repository authors with repository write-level access, looked up through GitHub's collaborators permission endpoint | One CODEOWNER approval after the latest push; administrators included |
 
 Unset or invalid mode configuration fails closed to `contributor`.
 
@@ -85,13 +85,13 @@ Repository administrators retain emergency bypass because branch protection is n
 
 ### Team
 
-GitHub's server-supplied `author_association` identifies trusted repository relationships. Helicopter accepts the internal path only when:
+GitHub's collaborators permission endpoint determines repository write-level access (`admin`, `maintain`, or `write`). Helicopter accepts the internal path only when:
 
-1. the author association is `OWNER`, `MEMBER`, or `COLLABORATOR`;
+1. the permission lookup says the author has admin, maintain, or write access;
 2. the author and event sender are the same human user;
 3. the pull request uses a branch in the governed repository, not a fork.
 
-The same-repository requirement matters: organization membership alone does not grant the exemption. An internal coworker using a fork follows the external path. A collaborator trusted with repository write access is treated as internal even if they are not an employee.
+The permission lookup sees access granted through private organization membership, unlike the PR event's `author_association` field. A failed or unavailable lookup fails closed to the external path. The same-repository requirement matters: organization membership alone does not grant the exemption. An internal coworker using a fork follows the external path. A collaborator trusted with repository write access is treated as internal even if they are not an employee.
 
 External contributors, bots, and fork pull requests always follow the full contribution contract.
 
