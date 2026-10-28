@@ -5,6 +5,11 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.6.0 - 2026-10-28
+### Changed
+* The pull request template's Verification placeholder asks contributors to say what they couldn't run or test, so a reviewer sees the gaps alongside the results. Nothing new is enforced.
+### Action required
+* Bot pull requests are authorized by GitHub permissions instead of a list: a bot that opens a pull request from a branch of this repository (which needs write access an administrator granted) skips admission and is queued like the maintainer's own work; bot pull requests from forks are refused. HELICOPTER_AUTOMATION_LOGINS and the Automation authorization issue form are gone. Agents submit through a person's account. (**Action:** Delete the HELICOPTER_AUTOMATION_LOGINS repository variable. Check which GitHub Apps have write access to the repository: each one's pull requests now skip admission.)
 ## v0.5.0 - 2026-10-27
 ### Changed
 * Add upstream documentation and keep its Poolboy configuration, state, and publishing workflow out of adopter releases.
