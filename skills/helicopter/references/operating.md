@@ -81,7 +81,7 @@ removes an existing risk label.
 
 - After `HELICOPTER_QUEUE_NUDGE_HOURS` (default 168, seven days), one comment mentions the requested reviewers.
 - After `HELICOPTER_QUEUE_PAUSE_HOURS` (default 504, 21 days), the pull request is labelled `queue:no-capacity` and the contributor is told publicly. It stays open.
-- Drafts are not queued. Pull requests from maintainers (`OWNER`, `MEMBER`, `COLLABORATOR`) and from bots on branches of this repository are queued only in `team` mode; see [Busy internal teams](modes.md#busy-internal-teams). Contributors' view of the labels is in [The review queue](queue.md).
+- Drafts are not queued. Pull requests from authors with admin, maintain, or write access (the queue asks GitHub's collaborators permission endpoint) and from bots on branches of this repository are queued only in `team` mode; see [Busy internal teams](modes.md#busy-internal-teams). A failed permission lookup treats the author as an outside contributor. Contributors' view of the labels is in [The review queue](queue.md).
 - When another pull request that references the same issue merges while this one waits, the pull request is labelled `queue:possibly-superseded` and gets one comment naming it. Nothing closes automatically and the turn doesn't change; close them in a batch from the hopper below, or remove the label to dismiss it. On oh-my-pi this flagged 16 of 51 superseded closures and none of 60 merged pull requests.
 
 `contribution-queue.yml` reconciles every hour and on pull request comments, so hour thresholds mean something. Maintainer reviews on fork pull requests are picked up by the next sweep. On a private repository each sweep uses a few Actions minutes; lower the cron frequency if day thresholds are enough.
