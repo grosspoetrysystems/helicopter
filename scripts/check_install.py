@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
-from configure_repository import MODES, QUEUE_LABELS, REQUIRED_CHECKS, TAG_RULESET, protection
+from configure_repository import MODES, QUEUE_LABELS, REQUIRED_CHECKS, RISK_LABELS, TAG_RULESET, protection
 
 HELICOPTER = "grosspoetrysystems/helicopter"
 PRIVILEGED_TRIGGERS = ("pull_request_target", "workflow_run", "issue_comment")
@@ -206,10 +206,13 @@ def settings_findings(repository: str, fetch: Fetch) -> list[Finding]:
             configure,
         )
 
-    labels = read(f"repos/{repository}/labels?per_page=100", "queue labels")
+    labels = read(f"repos/{repository}/labels?per_page=100", "queue and risk labels")
     if labels is not None:
-        missing = sorted(set(QUEUE_LABELS) - {label["name"] for label in labels})
-        check("queue labels", not missing, f"missing {', '.join(missing)}; {configure}")
+        names = {label["name"] for label in labels}
+        missing_queue = sorted(set(QUEUE_LABELS) - names)
+        missing_risk = sorted(set(RISK_LABELS) - names)
+        check("queue labels", not missing_queue, f"missing {', '.join(missing_queue)}; {configure}")
+        check("risk labels", not missing_risk, f"missing {', '.join(missing_risk)}; {configure}")
 
     rulesets = read(f"repos/{repository}/rulesets", "release-tag ruleset")
     if rulesets is not None:

@@ -9,6 +9,24 @@ Every open pull request from an outside contributor carries one label saying who
 | `queue:no-capacity` | Nobody's yet | A maintainer's turn lasted 21 days (`HELICOPTER_QUEUE_PAUSE_HOURS`). The pull request stays open and keeps its place; the comment says so publicly instead of leaving it silent. |
 | `queue:possibly-superseded` | Unchanged | Another pull request for the same issue merged while this one waited. One comment names it. A maintainer closes it, or removes the label to dismiss the notice for good. |
 
+## Advisory risk labels
+
+The intake workflow also derives path signals independently of the queue:
+
+| Label | Derived when changed paths include |
+| --- | --- |
+| `risk:dependencies` | dependency manifests or lockfiles |
+| `risk:automation` | workflows, actions, release or policy files, or agent instructions |
+| `risk:generated` | a `.gitattributes` entry marks the path `linguist-generated` or `linguist-vendored` |
+
+These labels are advisory outputs, not queue state. The job sets exactly the
+applicable `risk:` labels and removes stale ones after a complete file listing;
+when GitHub returns missing or capped file data, it retains existing risk labels
+because unknown absence is not a negative finding. The Actions job summary lists
+the paths behind each label beside the author's ticked Risk boxes. It does not
+comment or refuse admission, and it cannot detect authentication or other
+security-sensitive changes from paths.
+
 Not queued: drafts, the maintainer's own pull requests outside `team` mode, and pull requests from bots on branches of this repository (treated as the maintainer's own work).
 
 Once an hour, if `.github/helicopter/version.json` names an older release than Helicopter's latest, the queue opens one issue, "Helicopter VERSION is available". Close it to skip that release; it isn't reopened. Repositories with Dependabot also get a pull request bumping `.github/workflows/helicopter-release.yml`, which can carry the update itself.
