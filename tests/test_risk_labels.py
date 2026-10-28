@@ -45,6 +45,12 @@ class PathMappingTests(unittest.TestCase):
         self.assertEqual(labels["risk:automation"], [".github/workflows/test.yml", "nested/CODEOWNERS"])
         self.assertNotIn("README.md", sum(labels.values(), []))
 
+    def test_lockfiles_match_by_name_not_by_substring(self):
+        locks = ["yarn.lock", "web/pnpm-lock.yaml", "package-lock.json", "Cargo.lock", "bun.lockb"]
+        lookalikes = ["src/clock.ts", "deadlock_test.go", "blocklist.json", "ui/unlock.tsx"]
+        labels = derive(locks + lookalikes, [])
+        self.assertEqual(sorted(labels["risk:dependencies"]), sorted(locks))
+
     def test_gitattributes_generated_and_vendored_patterns(self):
         patterns = generated_patterns(
             """# generated files

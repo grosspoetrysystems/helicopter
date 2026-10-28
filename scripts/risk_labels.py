@@ -37,7 +37,12 @@ RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
         "risk:dependencies",
         (
             "package.json",
-            "*lock*",
+            # Lockfiles by name, not "*lock*": that would also catch clock.ts or deadlock_test.go.
+            "*.lock",
+            "*.lockb",
+            "package-lock.json",
+            "npm-shrinkwrap.json",
+            "pnpm-lock.yaml",
             "go.mod",
             "go.sum",
             "requirements*.txt",
