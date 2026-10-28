@@ -29,11 +29,12 @@ PR_HEAD = re.compile(r"head\.sha|head\.ref|head_ref|refs/pull/|merge_commit_sha"
 CHECKOUT = re.compile(r"uses:\s*actions/checkout@")
 TRUSTED_REF = "ref: ${{ github.event.repository.default_branch }}"
 
-# Helicopter's own files: its development tooling, README, and the helicopter skill (whose references replace
+# Helicopter's own files: its development tooling, README, the release-check action (adopters pin it), and the helicopter skill (whose references replace
 # the guides older releases shipped). Releases leave them out; an adopter's copy shouldn't have them.
 NOT_SHIPPED = (
     ".changes/",
     "AGENTS.md",
+    "action.yml",
     "CHANGELOG.md",
     "README.md",
     "assets/helicopter-header.webp",
@@ -58,6 +59,7 @@ NOT_SHIPPED = (
 DEV_MARKERS = {
     ".changes/": "HELICOPTER_",
     "AGENTS.md": "# Working on Helicopter",
+    "action.yml": "Helicopter release check",
     "CHANGELOG.md": "HELICOPTER_",
     "README.md": "helicopter-header.webp",
     "MAINTAINERS.md": "# Maintaining and adopting Helicopter",

@@ -40,11 +40,11 @@ To explain how something works or to change settings, see [References](#referenc
 
 ## Update
 
-1. `git switch -c helicopter-update-VERSION`, then `python3 scripts/stage.py --target .`.
+1. `git switch -c helicopter-update-VERSION`, then `python3 scripts/stage.py --target .`. If a Dependabot pull request bumping `grosspoetrysystems/helicopter` started this, work on its branch instead: the update lands in that pull request.
 2. Turn the plan into a task list before editing anything: one task per `merged`, `conflict`, `differs`, and `missing` file, and one per entry under `### Action required` in `release_notes` (each says exactly what to do).
 3. Work the tasks as described in [Plan outcomes](#plan-outcomes).
 4. Commit in this order, following the repository's commit convention, each signed off:
-   1. `chore(helicopter): update to VERSION`: the `added`, `updated`, and `removed` files, `.github/helicopter/version.json`, and `.github/helicopter/LICENSE`. These are exactly the release's files, so this commit needs no review of its own.
+   1. `chore(helicopter): update to VERSION`: the `added`, `updated`, and `removed` files, `.github/helicopter/version.json`, `.github/helicopter/LICENSE`, and `.github/workflows/helicopter-release.yml` when the plan lists it. These are exactly the release's files, so this commit needs no review of its own.
    2. `chore(helicopter): merge VERSION into customized files`: every `merged`, resolved `conflict`, `differs`, and `missing` file. If they span unrelated areas (workflows, scripts, policy text), commit per area.
    3. One commit per Action required item that changes files.
 5. [Check](#check), then `gh pr create`. In the body: `Closes #N` for an open "Helicopter VERSION is available" issue, base and new version, the release notes link, every merge decision you made, and a checklist of Action required items that need the maintainer (settings, secrets, variables), with the exact command for each.

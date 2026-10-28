@@ -1,0 +1,42 @@
+name: Helicopter release check
+description: Recommends running the helicopter skill when this pinned Helicopter release is newer than the repository's Helicopter files. Never fails.
+author: Gross Poetry Systems
+
+# Used by the optional .github/workflows/helicopter-release.yml that the helicopter skill installs. Dependabot
+# bumps that pin when Helicopter releases; this step then says what to do on the pull request.
+runs:
+  using: composite
+  steps:
+    - name: Compare the pinned release with .github/helicopter/version.json
+      shell: python3 {0}
+      env:
+        CHANGELOG: ${{ github.action_path }}/CHANGELOG.md
+      run: |
+        import json, os, re
+        from pathlib import Path
+
+        def numbers(version):
+            return tuple(int(n) for n in re.findall(r"[0-9]+", version))
+
+        # The pin is a commit SHA, so the version comes from the pinned tree: a release commit's CHANGELOG
+        # starts with that release.
+        pinned = re.search(r"^## (v[0-9]+\.[0-9]+\.[0-9]+)", Path(os.environ["CHANGELOG"]).read_text(), re.M).group(1)
+        marker = Path(".github/helicopter/version.json")
+        if not marker.is_file():
+            print(f"No {marker} here; nothing to compare with Helicopter {pinned}.")
+            raise SystemExit(0)
+        installed = json.loads(marker.read_text())["version"]
+        if numbers(pinned) <= numbers(installed):
+            print(f"Helicopter's files are on {installed}, the same or newer than the pinned {pinned}.")
+            raise SystemExit(0)
+        notes = f"https://github.com/grosspoetrysystems/helicopter/releases/tag/{pinned}"
+        print(f"::warning title=Helicopter {pinned} is available::This repository's Helicopter files are on {installed}. "
+              f"Read the release notes ({notes}), then run the helicopter skill on this branch, or close the pull request to skip {pinned}.")
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+            summary.write(
+                f"### Helicopter {pinned} is available\n\n"
+                f"This repository's Helicopter files are on {installed}. Read the [release notes]({notes}), "
+                "especially anything under **Action required**.\n\n"
+                "To update, run the `helicopter` agent skill on this branch (`npx skills add grosspoetrysystems/helicopter`); "
+                f"it adds the file changes to this pull request for you to review. To skip {pinned}, close the pull request.\n"
+            )

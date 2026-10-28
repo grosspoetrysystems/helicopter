@@ -121,6 +121,37 @@ OURS = {
 }
 
 
+class ReleaseCheckTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.target = Path(directory.name)
+        self.workflow = self.target / stage.RELEASE_CHECK
+
+    @staticmethod
+    def release(version: str, digit: str) -> dict:
+        return {"version": version, "commit": digit * 40}
+
+    def test_installs_and_first_updates_add_it_pinned_to_the_release(self):
+        for base in (None, "v0.6.0"):
+            self.workflow.unlink(missing_ok=True)
+            self.assertEqual(stage.release_check(self.release("v0.7.0", "a"), self.target, base, write=True), "added")
+            self.assertIn("grosspoetrysystems/helicopter@" + "a" * 40 + " # v0.7.0", self.workflow.read_text())
+
+    def test_updates_move_only_the_helicopter_pin(self):
+        stage.release_check(self.release("v0.7.0", "a"), self.target, None, write=True)
+        bumped = self.workflow.read_text().replace("checkout@3d3c42e5aac5ba805825da76410c181273ba90b1", "checkout@" + "c" * 40)
+        self.workflow.write_text(bumped)  # Dependabot bumped the checkout action meanwhile
+        self.assertEqual(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.7.0", write=True), "updated")
+        self.assertEqual(self.workflow.read_text(), bumped.replace("a" * 40 + " # v0.7.0", "b" * 40 + " # v0.8.0"))
+        self.assertEqual(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.8.0", write=True), "unchanged")
+
+    def test_deleted_means_opted_out_and_old_releases_get_none(self):
+        self.assertIsNone(stage.release_check(self.release("v0.8.0", "b"), self.target, "v0.7.0", write=True))
+        self.assertIsNone(stage.release_check(self.release("v0.6.0", "b"), self.target, None, write=True))
+        self.assertFalse(self.workflow.exists())
+
+
 class UpdateTests(unittest.TestCase):
     def setUp(self):
         self.repo = Repository(OURS)
