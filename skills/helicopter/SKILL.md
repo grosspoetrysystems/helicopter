@@ -76,6 +76,7 @@ Both live in the repository after install. Every file line must pass before the 
 From real installs:
 
 - **Renamed jobs or workflows.** If the repository renamed the admission workflow or its jobs, the checker still finds the workflow, but `configure_repository.py` would require the original check names, which never report, and block every merge. Don't run it; set required checks by hand.
+- **Skill repositories.** If `SKILL.md` is at the repository root, don't install there: skill installers such as `npx skills add` copy the whole repository into the user's skill folder, Helicopter's scripts and workflows included. Install it in the repository that collects the skills instead.
 - **Same-named files.** A repository's own `README.md`, `lefthook.yml`, `release.yml`, or `.changes/` is not Helicopter's. The checker tells them apart by content; don't delete them.
 - **`workflow_run` and `issue_comment` workflows** are privileged. A checkout there must name the default branch or no ref at all (GitHub then checks out the default branch, or the chosen ref on a manual `workflow_dispatch` run). Don't pin a manually dispatched deploy to the default branch just to satisfy the checker.
 - **Search lag.** Don't count pull requests with GitHub search in a check; it lags a just-opened pull request. List them instead.
