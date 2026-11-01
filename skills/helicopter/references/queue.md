@@ -18,6 +18,7 @@ The intake workflow also derives path signals independently of the queue:
 | `risk:dependencies` | dependency manifests or lockfiles |
 | `risk:automation` | workflows, actions, release or policy files, or agent instructions |
 | `risk:generated` | a `.gitattributes` entry marks the path `linguist-generated` or `linguist-vendored` |
+| `risk:large` | more than 1,000 changed lines or 50 files, not counting lockfiles and generated or vendored files (`SPLIT_LINES`, `SPLIT_FILES` in `scripts/risk_labels.py`) |
 
 These labels are advisory outputs, not queue state. The job sets exactly the
 applicable `risk:` labels and removes stale ones after a complete file listing;
