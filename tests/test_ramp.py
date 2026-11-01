@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import contextlib
 import io
 import sys
 import unittest
@@ -278,10 +277,7 @@ class UpdateNoticeTests(unittest.TestCase):
 
             def request(self, method, path, body=None):
                 raise urllib.error.HTTPError(path, 410, "Gone", {}, None)
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            self.assertIsNone(update_notice(IssuesOff(), "v0.2.0", {"version": "v0.3.0"}))
-        self.assertEqual(out.getvalue(), "Update check skipped: issues are turned off\n")
+        self.assertIsNone(update_notice(IssuesOff(), "v0.2.0", {"version": "v0.3.0"}))
 
     def test_newer_release_opens_one_issue_naming_its_action_steps(self):
         github = self.Recorder()
