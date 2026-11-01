@@ -1,0 +1,3 @@
+kind: Fixed
+body: 'Shorten the `risk:large` label description to GitHub''s 100-character limit; on v0.9.0 the configurator failed to create the label.'
+time: 2026-11-01T22:43:25+01:00
