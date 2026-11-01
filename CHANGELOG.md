@@ -5,6 +5,11 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.9.0 - 2026-11-01
+### Fixed
+* Close HTTP error responses discarded by maintainer-permission and linked-issue lookups.
+### Action required
+* New advisory `risk:large` label past 1,000 changed lines or 50 files, lockfiles and generated files excluded. (**Action:** create the label by rerunning `python3 scripts/configure_repository.py MODE`, or with `gh label create risk:large --color e99695`; `check_install.py` reports it missing until then)
 ## v0.8.1 - 2026-10-28
 ### Fixed
 * Use repository permissions to detect maintainers when GitHub reports CONTRIBUTOR for private organization members.

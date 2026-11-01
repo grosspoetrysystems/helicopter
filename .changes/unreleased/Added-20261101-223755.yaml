@@ -1,3 +1,0 @@
-kind: Added
-body: Advisory risk:large label when a pull request changes more than 1,000 lines or 50 files, not counting lockfiles and generated files. Run the configurator to create the label.
-time: 2026-11-01T22:37:55.621829+01:00
