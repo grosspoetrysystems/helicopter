@@ -5,6 +5,9 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.9.1 - 2026-11-01
+### Fixed
+* Shorten the `risk:large` label description to GitHub's 100-character limit; on v0.9.0 the configurator failed to create the label.
 ## v0.9.0 - 2026-11-01
 ### Fixed
 * Close HTTP error responses discarded by maintainer-permission and linked-issue lookups.
