@@ -55,7 +55,9 @@ After `validate-metadata` passes, the separate `risk-labels` job checks out only
 `scripts/` and `.gitattributes` from the protected default branch. It reads the
 changed-file list through the GitHub API, never checks out or executes the
 contributor head, and sets exactly the applicable `risk:` labels:
-`risk:dependencies`, `risk:automation`, and `risk:generated`. It removes stale
+`risk:dependencies`, `risk:automation`, and `risk:generated`, plus
+`risk:large` when the change passes 1,000 lines or 50 files with lockfiles and
+generated files excluded (a hint to split it, not a refusal). It removes stale
 `risk:` labels after a complete file listing, but retains them when GitHub's
 file data is missing or capped at 3,000 because unknown absence is not a
 negative finding. The job writes a small path-to-label table and the author's

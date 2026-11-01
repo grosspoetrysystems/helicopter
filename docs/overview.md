@@ -29,7 +29,9 @@ passes:
    PR-Agent with the repository's `HELICOPTER_REVIEW_KEY`. The review is
    advisory and reads the pull request through the API.
 3. **Advisory risk labels:** after admission, `risk_labels.py` maps changed
-   paths to `risk:dependencies`, `risk:automation`, and `risk:generated`. It
+   paths to `risk:dependencies`, `risk:automation`, and `risk:generated`, and
+   adds `risk:large` past 1,000 changed lines or 50 files (lockfiles and
+   generated files excluded). It
    updates only those labels and records them beside the author's Risk boxes in
    the Actions job summary; it does not comment, refuse, or infer security risk.
 4. **Queue:** `pr_queue.py` derives whose turn it is from the timeline and
