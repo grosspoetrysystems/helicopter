@@ -324,6 +324,7 @@ def update_notice(github: GitHub, installed: str, latest: dict[str, Any]) -> str
     """Open one issue per newer Helicopter release. Closing it skips that release; nothing reopens it."""
     version = latest["version"]
     if numbers(version) <= numbers(installed):
+        print(f"Helicopter {installed}: up to date")
         return None
     title = f"Helicopter {version} is available"
     # ponytail: search lags a minute or so, far inside the hourly sweep; it finds closed issues too.
@@ -335,6 +336,7 @@ def update_notice(github: GitHub, installed: str, latest: dict[str, Any]) -> str
         print(f"Update check skipped: {'issues are turned off' if error.code == 410 else error}")
         return None
     if any(item["title"] == title for item in (found or {}).get("items", [])):
+        print(f"Helicopter {installed}: already notified about {version}")
         return None
     steps = latest.get("action_required") or 0
     body = (
@@ -365,7 +367,8 @@ def check_for_update(github: GitHub) -> None:
         print(f"Update check skipped: {error}")
         return
     opened = update_notice(github, installed, latest)
-    print(f"Helicopter {installed}: " + (f"opened an issue for {opened}" if opened else "up to date or already notified"))
+    if opened:
+        print(f"Helicopter {installed}: opened an issue for {opened}")
 
 
 def repository_bot(pr: dict[str, Any]) -> bool:
