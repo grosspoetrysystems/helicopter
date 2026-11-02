@@ -5,6 +5,10 @@ changie fragment under `.changes/unreleased/`. See `AGENTS.md` for how to add on
 
 
 
+## v0.9.2 - 2026-11-02
+### Fixed
+* The queue's update check no longer logs "up to date or already notified" after it skipped the check.
+* The skill now writes the version marker, license notice, and release check for a copy that matches the latest release but has no marker (made with GitHub's "Use this template" or by hand). Before, it said "nothing to do", while the checker kept pointing back to it.
 ## v0.9.1 - 2026-11-01
 ### Fixed
 * Shorten the `risk:large` label description to GitHub's 100-character limit; on v0.9.0 the configurator failed to create the label.
