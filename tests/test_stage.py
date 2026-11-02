@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import io
 import json
@@ -203,6 +204,33 @@ class UpdateTests(unittest.TestCase):
         older = {**BASE, "untouched.py": b"v0\n", "customized.md": b"something else entirely\n"}
         self.assertGreater(stage.match_score(BASE, self.repo.target), stage.match_score(older, self.repo.target))
         self.assertGreater(stage.match_score(BASE, self.repo.target), stage.match_score(NEW, self.repo.target))
+
+    def test_an_unmarked_copy_of_the_latest_release_gets_its_marker(self):
+        # A copy made without the skill (GitHub's "Use this template", or by hand) matches the release exactly.
+        release = {**RELEASE, "scripts/pr_queue.py": b"queue\n"}
+        files = {path: data for path, data in release.items() if path != "LICENSE"}
+        repo = Repository(files)
+        self.addCleanup(repo.close)
+        subprocess.run(["git", "init", "-q", str(repo.target)], check=True, env=GIT_ENV)
+        subprocess.run(["git", "-C", str(repo.target), "add", "-A"], check=True, env=GIT_ENV)
+        subprocess.run(["git", "-C", str(repo.target), "-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false",
+                        "commit", "-qm", "copy"], check=True, env=GIT_ENV)
+        latest = {**manifest(release, "v0.9.1"), "notes": "https://example.invalid/notes"}
+        responses = {"helicopter.json": json.dumps(latest).encode(), ".tar.gz": archive(release)}
+        fake_fetch = lambda url: next(data for end, data in responses.items() if url.endswith(end))  # noqa: E731
+        argv, fetch, tags = sys.argv, stage.fetch, stage.release_tags
+        sys.argv = ["stage.py", "--target", str(repo.target)]
+        stage.fetch, stage.release_tags = fake_fetch, lambda: ["v0.9.1"]
+        try:
+            with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(stage.main(), 0)
+        finally:
+            sys.argv, stage.fetch, stage.release_tags = argv, fetch, tags
+        plan = json.loads(out.getvalue())
+        self.assertEqual((plan["mode"], plan["base_detected"]), ("update", True))
+        self.assertEqual(json.loads(repo.read(stage.VERSION_MARKER))["version"], "v0.9.1")
+        self.assertEqual(repo.read(".github/helicopter/LICENSE"), b"MIT\n")
+        self.assertIsNotNone(repo.read(stage.RELEASE_CHECK))
 
     def test_writes_need_a_clean_git_checkout(self):
         self.assertIn("isn't a git repository", stage.dirty(self.repo.target))

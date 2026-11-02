@@ -336,7 +336,9 @@ def main() -> int:
         "notes": release["notes"],
         "dry_run": args.dry_run,
     }
-    if base_manifest and numbers(base_manifest["version"]) >= numbers(release["version"]):
+    # A detected base has no marker yet, so even an exact match still needs one written: without it the
+    # checker keeps failing and points back here.
+    if base_manifest and not detected and numbers(base_manifest["version"]) >= numbers(release["version"]):
         log(f"Already on Helicopter {base_manifest['version']}; nothing to do.")
         print(json.dumps({**plan, "mode": "current"}, indent=2))
         return 0
@@ -351,8 +353,9 @@ def main() -> int:
     files = release_files(release, archive)
     base = release_files(base_manifest, fetch(f"https://github.com/{REPOSITORY}/archive/{base_manifest['commit']}.tar.gz")) if base_manifest else {}
     staging = Path(tempfile.mkdtemp(prefix=f"helicopter-{release['version']}-"))
+    # No marker means the skill never ran here, so the optional release check is offered as on an install.
     outcome = stage(release, files, target, staging, base, write=not args.dry_run,
-                    base_version=base_manifest["version"] if base_manifest else None)
+                    base_version=base_manifest["version"] if base_manifest and not detected else None)
 
     plan.update(staging=str(staging), files={kind: paths for kind, paths in outcome.items() if paths})
     if base_manifest:
