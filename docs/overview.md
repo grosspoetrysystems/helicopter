@@ -74,8 +74,8 @@ Choose the mode that matches who maintains the repository:
 | Mode | Admission exemption | Protected-branch review |
 | --- | --- | --- |
 | `solo` | Only the configured immutable maintainer ID on a same-repository branch | Zero required approvals |
-| `contributor` | None; every contribution follows the contract | One CODEOWNER approval |
-| `team` | Same-repository authors with admin, maintain, or write access, looked up through GitHub's collaborators permission endpoint | One CODEOWNER approval after the latest push |
+| `contributor` | None; every contribution follows the contract | One CODEOWNER approval after the latest push |
+| `team` | Same-repository authors with admin, maintain, or write access, looked up through GitHub's collaborators permission endpoint | One CODEOWNER approval after the latest push; administrators included |
 
 An unset or invalid mode fails closed to `contributor`. External contributors,
 bots on forks, and fork pull requests follow the full contribution
