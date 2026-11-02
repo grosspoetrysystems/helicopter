@@ -13,9 +13,9 @@ All modes:
 - require `test-validator` and `validate-metadata`;
 - require resolved review conversations;
 - block force pushes and branch deletion; and
-- retain administrator bypass for emergency recovery.
+- retain administrator bypass for emergency recovery in `solo` and `contributor` (`team` enforces review on administrators too).
 
-`solo` requires zero approvals because no second reviewer exists. `contributor` and `team` require one approval and CODEOWNER review; `team` also requires approval after the latest push. See [maintainer operating modes](modes.md) for the trust and transition rules.
+`solo` requires zero approvals because no second reviewer exists. `contributor` and `team` require one CODEOWNER approval given after the latest push. See [maintainer operating modes](modes.md) for the trust and transition rules.
 
 For public repositories, set the concurrent non-draft PR limit for users without write access. Start at two unless maintainer capacity supports more; add trusted contributors to the bypass list deliberately.
 

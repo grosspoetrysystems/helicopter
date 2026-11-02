@@ -36,7 +36,7 @@ To explain how something works or to change settings, see [References](#referenc
 3. **Adapt.** Replace Helicopter's owners, contacts, and name in `.github/CODEOWNERS`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/*`, `CODE_OF_CONDUCT.md`, and `CONTRIBUTING.md`. Add the project's dependency manifests, lockfiles, release paths, and security-sensitive code to CODEOWNERS. Put the project's builds and tests in their own `pull_request` workflow with no secrets.
 4. **Register.** Add to `AGENTS.md` (create it if missing): `Contribution governance comes from Helicopter (.github/helicopter/version.json). Use the helicopter skill to update or check it: npx skills add grosspoetrysystems/helicopter`.
 5. **Verify and open the pull request.** See [Check](#check), then one signed-off commit, `feat: adopt Helicopter vX.Y.Z`, and `gh pr create`.
-6. **After the merge**, only when the maintainer says so: open one valid and one deliberately invalid draft pull request so `test-validator` and `validate-metadata` report once, then run `python3 scripts/configure_repository.py MODE` and the checker again. For a CLA, `gh variable set HELICOPTER_SIGNOFF --body off`. For the optional first review, the maintainer adds a `HELICOPTER_REVIEW_KEY` secret (an OpenRouter key with a credit limit).
+6. **After the merge**, only when the maintainer says so: open one draft pull request so `test-validator` and `validate-metadata` report once (drafts skip admission, so its content doesn't matter; close it afterwards), then run `python3 scripts/configure_repository.py MODE` and the checker again. For a CLA, `gh variable set HELICOPTER_SIGNOFF --body off`. For the optional first review, the maintainer adds a `HELICOPTER_REVIEW_KEY` secret (an OpenRouter key with a credit limit).
 
 ## Update
 
@@ -80,6 +80,7 @@ From real installs:
 - **Same-named files.** A repository's own `README.md`, `lefthook.yml`, `release.yml`, or `.changes/` is not Helicopter's. The checker tells them apart by content; don't delete them.
 - **`workflow_run` and `issue_comment` workflows** are privileged. A checkout there must name the default branch or no ref at all (GitHub then checks out the default branch, or the chosen ref on a manual `workflow_dispatch` run). Don't pin a manually dispatched deploy to the default branch just to satisfy the checker.
 - **Search lag.** Don't count pull requests with GitHub search in a check; it lags a just-opened pull request. List them instead.
+- **Settings lag.** Right after the configurator, the checker can still report secret scanning or web-commit sign-off as off for a few seconds. Run it again before acting on those lines.
 
 ## References
 

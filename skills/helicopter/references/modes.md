@@ -103,10 +103,10 @@ All modes:
 - require branches to be up to date;
 - require resolved review conversations;
 - block force pushes and branch deletion;
-- leave administrator enforcement disabled for emergency recovery;
+- leave administrator enforcement disabled in `solo` and `contributor`, for emergency recovery and a lone maintainer's own merges (`team` enforces it);
 - keep production deploy and release triggers explicit.
 
-`solo` deliberately requires no approval because no second reviewer exists. `contributor` requires one approval but does not require approval after the latest push, allowing a maintainer to complete review after contributor updates. `team` requires approval after the latest push so one coworker cannot both supply the final update and final approval.
+`solo` deliberately requires no approval because no second reviewer exists. `contributor` and `team` require one approval given after the latest push, so a push after a human approval, whether by an agent, a coworker, or the contributor, needs a fresh review.
 
 Check the effective settings, including branch protection, against the mode:
 
