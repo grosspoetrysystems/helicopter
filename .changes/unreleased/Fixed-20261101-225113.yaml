@@ -1,3 +1,0 @@
-kind: Fixed
-body: The queue's update check no longer logs "up to date or already notified" after it skipped the check.
-time: 2026-11-01T22:51:13.516597+01:00
