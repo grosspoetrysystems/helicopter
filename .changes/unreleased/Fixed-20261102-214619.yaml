@@ -1,0 +1,3 @@
+kind: Fixed
+body: The skill now writes the version marker, license notice, and release check for a copy that matches the latest release but has no marker (made with GitHub's "Use this template" or by hand). Before, it said "nothing to do", while the checker kept pointing back to it.
+time: 2026-11-02T21:46:19.996358+01:00
